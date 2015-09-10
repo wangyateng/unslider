@@ -1,0 +1,15 @@
+/**
+ *   Table of contents:
+ *
+ *   0. Browser reset import. (Don't need to copy this.)
+ *   1. Shared slider styles. (Copy this if you want the same styles in your slider.)
+ */
+ 
+/**
+ *   0. Import our browser reset.
+ */
+@import 'reset.css';
+
+/**
+ *   1. Shared styling for all demo sliders.
+ */
