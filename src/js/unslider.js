@@ -29,12 +29,20 @@
 
 		//  Generate a specific random ID so we don't dupe events
 		this.sliderID = ~~(Math.random() * 2e3);
+		this.eventSuffix = '.unslider-' + this.sliderID;
 
 		//  Get everything set up innit
 		this.init = function(options) {
 			//  Set up our options inside here so we can re-init at
 			//  any time
 			this.options = $.extend($.Unslider.defaults, options);
+
+			//  Our elements
+			this.$container = this.$context.find(this.options.selectors.container).addClass('unslider-wrap');
+			this.$slides = this.$container.children(this.options.selectors.slides);
+
+			//  We'll manually init the container
+			this.setup();
 
 			//  We want to keep this script as small as possible
 			//  so we'll optimise some checks
@@ -46,20 +54,16 @@
 				}
 			});
 
+			//  Add our logging
+			this._console('Slider initiated');
 
-			this.$container = this.$context.find(this.options.selectors.container);
-			this.$slides = this.$container.children(this.options.selectors.slides);
-
-			//  We'll manually init the container
-			this.setup();
-
-			//  Everyday I'm chainin
+			//  Everyday I'm chainin'
 			return this;
 		};
 
 		this.setup = function() {
 			//  Add a CSS hook to the main element
-			this.$context.addClass('unslider');
+			this.$context.addClass('unslider-slider').wrap('<div class="unslider" />');
 
 			//  We need to manually check if the container is absolutely
 			//  or relatively positioned
@@ -95,7 +99,17 @@
 
 		//  Set up our navigation
 		this.initArrows = function() {
-			// @TODO
+			if(this.options.arrows === true) {
+				this.options.arrows = $.Unslider.defaults.arrows;
+			}
+
+			this._console('Arrows set up');
+
+			//  Loop our options object and bind our events
+			$.each(self.options.arrows, function(key, val) {
+				//  Add our arrow HTML and bind it
+				$(val).insertAfter(self.$context).on('click' + self.eventSuffix, $.proxy(self[key], self));
+			});
 		};
 
 
@@ -105,7 +119,9 @@
 				this.options.keys = $.Unslider.defaults.keys;
 			}
 
-			$(document).on('keyup.unslider-' + this.sliderID, function(e) {
+			this._console('Keyboard shortcuts set up');
+
+			$(document).on('keyup' + this.eventSuffix, function(e) {
 				$.each(self.options.keys, function(key, val) {
 					if(e.which === val) {
 						$.isFunction(self[key]) && self[key].call(self);
@@ -115,10 +131,14 @@
 		};
 
 		this.destroyKeys = function() {
-			$(document).off('keyup.unslider-' + this.sliderID);
-		}
+			//  Remove the 
+			$(document).off('keyup' + this.eventSuffix);
+			this._console('Keyboard shortcuts removed');
+		};
 
 		this.setIndex = function(to) {
+			this._console('Current slide index updated to ' + to);
+
 			if(to < 0) {
 				to = this.total - 1;
 			}
@@ -142,7 +162,7 @@
 				return this[fn](this.current);
 			}
 
-			return this._console('Not a valid Unslider animation method.', 'warn');
+			return this._console('Not a valid animation method.', 'warn');
 		};
 
 		this.next = function() {
@@ -164,8 +184,13 @@
 		//  horizontal animation
 		this.animateHorizontal = function(to) {
 			if(this.options.animateHeight) {
-				this.$context.css('height', this.$slides.eq(to).height());
+				var height = this.$slides.eq(to).height();
+
+				this._console('Adjusting container height to ' + height);
+				this.$context.css('height', height);
 			}
+
+			this._console('Animating horizontally');
 
 			return this.$container.transform('translateX(-' + ((100 / this.total) * to) + '%)');
 		};
@@ -185,9 +210,8 @@
 			type = type || 'log';
 
 			//  And that's our little wrapper. Very neat.
-			return console[type](msg);
-		}
-
+			return console[type]('Unslider: ' + msg);
+		};
 
 		//  Unfortunately JavaScript doesn't have a ucfirst() function
 		//  (one of the good things about PHP!) so this is a workaround for that
@@ -196,9 +220,8 @@
 			return str.toString().toLowerCase().replace(/^./, function(match) {
 				//  And uppercase it. Simples.
 				return match.toUpperCase();
-			})
-		}
-		
+			});
+		};
 
 		//  Allow daisy-chaining of methods
 		return this.init();
@@ -241,8 +264,13 @@
 		nav: true,
 
 		//  Should there be left/right arrows to go back/forth?
-		//  This isn't keyboard support. Only accepts true/false.
-		arrows: true,
+		//   -> This isn't keyboard support.
+		//  Either set true/false, or an object with the HTML
+		//  elements for each arrow like below:
+		arrows: {
+			prev: '<a class="unslider-arrow prev">Previous slide</a>',
+			next: '<a class="unslider-arrow next">Next slide</a>'
+		},
 		
 		//  Should the slider move on its own or only when
 		//  you interact with the nav/arrows?
@@ -275,12 +303,9 @@
 
 	$.fn.transform = function(val) {
 		return this.css({
-			webkitTransform: val,
-			msTransform: val,
-			transform: val
+			webkitTransform: val, msTransform: val, transform: val
 		});
-	}
-
+	};
 	   
 	//  And set up our jQuery plugin
 	$.fn.unslider = function(opts) {

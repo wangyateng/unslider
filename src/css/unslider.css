@@ -14,13 +14,13 @@
 .unslider {
   overflow: auto;
 }
-.unslider ul {
+.unslider .unslider-wrap {
   position: relative;
   -webkit-transition: -webkit-transform 0.4s cubic-bezier(0.42, 0, 0.58, 1);
   -ms-transition: -ms-transform 0.4s cubic-bezier(0.42, 0, 0.58, 1);
   transition: transform 0.4s cubic-bezier(0.42, 0, 0.58, 1);
 }
-.unslider ul li {
+.unslider .unslider-wrap li {
   float: left;
 }
 .unslider li {
@@ -30,7 +30,17 @@
   padding: 0;
   border: none;
 }
-.unslider {
+.unslider .unslider-arrow {
+  position: absolute;
+  left: 20px;
+  z-index: 2;
+  cursor: pointer;
+}
+.unslider .unslider-arrow.next {
+  left: auto;
+  right: 20px;
+}
+.unslider-slider {
   -webkit-transition: height 0.4s cubic-bezier(0.42, 0, 0.58, 1);
   -ms-transition: height 0.4s cubic-bezier(0.42, 0, 0.58, 1);
   transition: height 0.4s cubic-bezier(0.42, 0, 0.58, 1);

@@ -24,12 +24,12 @@
 
 	text-align: center;
 	line-height: 200px;
+
+	border-radius: 8px;
 }
 	.my-slider li {
 		color: #fff;
 		text-shadow: 0 2px 4px rgba(0,0,0,.2);
-
-		border-radius: 8px;
 	}
 
 	.my-slider li:nth-child(1) {
@@ -40,4 +40,32 @@
 	}
 	.my-slider li:nth-child(3) {
 		background: linear-gradient(30deg, #5fbefe, #c8a0f8);
+	}
+
+
+.unslider-arrow {
+	display: block;
+	width: 32px;
+	height: 32px;
+
+	top: 50%;
+	margin-top: -16px;
+
+	overflow: hidden;
+
+	background: rgba(0,0,0,.2) no-repeat 50% 50%;
+	background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAkAAAAQCAQAAABuQZ3IAAAAi0lEQVR4AU3OISBEQQBAwS0AACS9NxqQgCZpkiYBVddFvWhAAUABAPQCAGC4g/0vTnrBqCfDIZl70J+kMUBPpEwT4FNXxBxz4F1HxHyr4EVTxBLb4EFNxEon4CJSlVNw9AcV9sC16h8osgke1P1ArgXwouVvdQq86ww/GQefusNf7kBviBlxpT8k+gL/Wox4r1d4MwAAAABJRU5ErkJggg==');
+	background-size: 7px 11px;
+
+	border-radius: 32px;
+	text-indent: -999em;
+
+	opacity: .6;
+	transition: opacity .2s;
+}
+	.unslider-arrow:hover {
+		opacity: 1;
+	}
+	.unslider-arrow.prev {
+		transform: rotate(-180deg);
 	}

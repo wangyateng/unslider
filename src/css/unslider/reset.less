@@ -5,7 +5,7 @@
 	// position: relative;
 	overflow: auto;
 
-	ul {
+	.unslider-wrap {
 		position: relative;
 
 		-webkit-transition: -webkit-transform @unslider-transition-speed @unslider-transition-function;
@@ -25,5 +25,18 @@
 		padding: 0;
 		
 		border: none;
+	}
+
+	.unslider-arrow {
+		position: absolute;
+		left: 20px;
+		z-index: 2;
+
+		cursor: pointer;
+
+		&.next {
+			left: auto;
+			right: 20px;
+		}
 	}
 }
