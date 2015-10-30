@@ -127,6 +127,11 @@
 				}
 			});
 
+			//  Add swipe support
+			if(typeof jQuery.event.special['swipe'] !== undefined) {
+				this.initSwipe();
+			}
+
 			//  Add our logging
 			this._console('Slider initiated');
 
@@ -242,6 +247,46 @@
 			});
 		};
 
+		//  Requires jQuery.event.swipe
+		//  -> stephband.info/jquery.event.swipe
+		this.initSwipe = function() {
+			var width = this.$slides.width();
+
+			this.$container.on({
+				swipeleft: $.proxy(this.next, this),
+				swiperight: $.proxy(this.prev, this),
+
+				movestart: function(e) {
+					//  If the movestart heads off in a upwards or downwards
+					//  direction, prevent it so that the browser scrolls normally.
+					if((e.distX > e.distY && e.distX < -e.distY) || (e.distX < e.distY && e.distX > -e.distY)) {
+						return !!e.preventDefault();
+					}
+
+					self.$container.css('position', 'relative');
+				},
+
+				//  We don't want to have a tactile swipe in the slider
+				//  in the fade animation, as it can cause some problems
+				//  with layout, so we'll just disable it.
+				move: function(e) {
+					if(this.options.animation !== 'fade') {
+						return;
+					}
+
+					self.$container.css('left', (100 * e.distX / width) + '%');
+				},
+
+				moveend: function(e) {
+					if(this.options.animation !== 'fade') {
+						return;
+					}
+
+					self.$container.animate({left: 0}, 200);
+				}
+			})
+		};
+
 		//  Unset the keyboard navigation
 		//  Remove the handler 
 		this.destroyKeys = function() {
@@ -273,7 +318,7 @@
 		//  Despite the name, this doesn't do any animation - since there's
 		//  now three different types of animation, we let this method delegate
 		//  to the right type, keeping the name for backwards compat.
-		this.animate = function(to) {
+		this.animate = function(to, dir) {
 			//  Animation shortcuts
 			//  Instead of passing a number index, we can now
 			//  use .data('unslider').animate('last');
@@ -290,7 +335,7 @@
 			//  Make sure it's a valid animation method, otherwise we'll get
 			//  a load of bug reports that'll be really hard to report
 			if($.isFunction(this[fn])) {
-				return this[fn](this.current);
+				return this[fn](this.current, dir);
 			}
 
 			return this._console('Not a valid animation method', 'warn');
@@ -310,14 +355,14 @@
 
 			this._console('Moving forward');
 
-			return this.animate(target);
+			return this.animate(target, 'next');
 		};
 
 		//  Previous is a bit simpler, we can just decrease the index
 		//  by one and check if it's over 0.
 		this.prev = function() {
 			this._console('Moving backwards');
-			return this.animate(this.current - 1);
+			return this.animate(this.current - 1, 'prev');
 		};
 		
 
@@ -338,7 +383,7 @@
 
 
 		//  Fade between slides rather than, uh, sliding it
-		this.animateFade = function(to) {
+		this.animateFade = function(to, dir) {
 			this._console('Fading between slides');
 
 			var $active = this.$slides.removeClass(this.options.lastActiveClass).eq(to);
@@ -347,6 +392,20 @@
 			if(!$prev.length) {
 				$prev = this.$slides.last();
 			}
+
+			if(dir === 'prev') {
+				var $next = $active.next();
+
+				if(!$next.length) {
+					$next = this.$slides.first();
+				}
+
+				console.log($next);
+
+				$prev = $prev.add($next);
+			}
+
+			console.log($prev);
 
 			//  Toggle our classes
 			$prev.addClass(this.options.lastActiveClass).removeClass(this.options.activeClass);
