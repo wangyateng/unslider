@@ -13,6 +13,78 @@
 	$.Unslider = function(context, options) {
 		var self = this;
 
+		//  Store our default options in here
+		//  Everything will be overwritten by the jQuery plugin though
+		this.defaults = {
+			//  Should Unslider throw any errors or warnings?
+			//  (except the jQuery one, that's sort of just there)
+			//  Only accepts a boolean true/false
+			debug: false,
+			
+			//  3 second delay between slides moving, pass
+			//  as a number in milliseconds.
+			delay: 3000,
+			
+			//  Does it support keyboard arrows?
+			//  Can pass either true or false -
+			//  or an object with the keycodes, like so:
+			//  {
+			//	 prev: 37,
+			//	 next: 39
+			// }
+			//  You can call any internal method name
+			//  before the keycode and it'll be called.
+			keys: {
+				prev: 37,
+				next: 39
+			},
+			
+			//  Do you want to generate clickable navigation
+			//  to skip to each slide? Only accepts boolean true/false
+			nav: true,
+
+			//  Should there be left/right arrows to go back/forth?
+			//   -> This isn't keyboard support.
+			//  Either set true/false, or an object with the HTML
+			//  elements for each arrow like below:
+			arrows: {
+				prev: '<a class="unslider-arrow prev">Previous slide</a>',
+				next: '<a class="unslider-arrow next">Next slide</a>'
+			},
+			
+			//  Should the slider move on its own or only when
+			//  you interact with the nav/arrows?
+			//  Only accepts boolean true/false.
+			autoplay: false,
+
+			//  How should Unslider animate?
+			//  It can do one of the following types:
+			//  "fade": each slide fades in to each other
+			//  "horizontal": each slide moves from left to right
+			//  "vertical": each slide moves from top to bottom
+			animation: 'horizontal',
+
+			//  jQuery UI easing type
+			//  see jqueryui.com/easing for a full list
+			easing: 'swing',
+
+			//  If you don't want to use a list to display your slides,
+			//  you can change it here. Not recommended and you'll need
+			//  to adjust the CSS accordingly.
+			selectors: {
+				container: 'ul:first',
+				slides: 'li'
+			},
+
+			//  Do you want to animate the heights of each slide as
+			//  it moves
+			animateHeight: true,
+
+			//  Active class for the nav
+			activeClass: 'unslider-active',
+			lastActiveClass: 'unslider-last-active'
+		};
+
 		//  Set defaults
 		this.$context = context;
 		this.options = {};
@@ -36,7 +108,7 @@
 		this.init = function(options) {
 			//  Set up our options inside here so we can re-init at
 			//  any time
-			this.options = $.extend($.Unslider.defaults, options);
+			this.options = $.extend(this.defaults, options);
 
 			//  Our elements
 			this.$container = this.$context.find(this.options.selectors.container).addClass('unslider-wrap');
@@ -59,12 +131,12 @@
 			this._console('Slider initiated');
 
 			//  Everyday I'm chainin'
-			return this;
+			return this.setIndex(this.current);
 		};
 
 		this.setup = function() {
 			//  Add a CSS hook to the main element
-			this.$context.addClass('unslider-slider').wrap('<div class="unslider" />');
+			this.$context.addClass('unslider-slider unslider-' + this.options.animation).wrap('<div class="unslider" />');
 			this.$parent = this.$context.parent();
 
 			//  We need to manually check if the container is absolutely
@@ -84,13 +156,16 @@
 			this.calculateSlides();
 		};
 
-		//  
+		//  Set up the slide widths to animate with
+		//  so the box doesn't float over
 		this.calculateSlides = function() {
 			this.total = this.$slides.length;
 
 			//  Set the total width
-			this.$container.css('width', (this.total * 100) + '%');
-			this.$slides.css('width', (100 / this.total) + '%');
+			if(this.options.animation !== 'fade') {
+				this.$container.css('width', (this.total * 100) + '%').addClass('unslider-carousel');
+				this.$slides.css('width', (100 / this.total) + '%');
+			}
 		};
 
 		//  Set up our navigation
@@ -109,7 +184,7 @@
 				}
 
 				//  And add it to our navigation item
-				$nav.children('ol').append('<li ' + (self.current === key ? 'class="' + self.options.activeClass + '"' : '') + ' data-slide="' + key + '">' + label + '</li>');
+				$nav.children('ol').append('<li data-slide="' + key + '">' + label + '</li>');
 			});
 			
 			//  Now our nav is built, let's add it to the slider and bind
@@ -132,7 +207,8 @@
 		};
 
 
-		//  Set up our navigation
+		//  Set up our left-right arrow navigation
+		//  (Not keyboard arrows, prev/next buttons)
 		this.initArrows = function() {
 			if(this.options.arrows === true) {
 				this.options.arrows = $.Unslider.defaults.arrows;
@@ -148,7 +224,8 @@
 		};
 
 
-		//  Set up our navigation
+		//  Set up our keyboad navigation
+		//  Allow binding to multiple keycodes
 		this.initKeys = function() {
 			if(this.options.keys === true) {
 				this.options.keys = $.Unslider.defaults.keys;
@@ -165,9 +242,13 @@
 			});
 		};
 
+		//  Unset the keyboard navigation
+		//  Remove the handler 
 		this.destroyKeys = function() {
-			//  Remove the 
+			//  Remove the event handler
 			$(document).off('keyup' + this.eventSuffix);
+
+			//  And let us know all about it
 			this._console('Keyboard shortcuts removed');
 		};
 
@@ -181,9 +262,12 @@
 			this.current = Math.min(Math.max(0, to), this.total - 1);
 
 			if(this.options.nav) {
-				this.$parent.find('.unslider-nav [data-slide="' + to + '"]').addClass(this.options.activeClass)
-					.siblings().removeClass(self.options.activeClass);
+				this.$parent.find('.unslider-nav [data-slide="' + to + '"]')._toggleActive(this.options.activeClass);
 			}
+
+			this.$slides.eq(this.current)._toggleActive(this.options.activeClass);
+
+			return this;
 		};
 		
 		//  Despite the name, this doesn't do any animation - since there's
@@ -224,12 +308,15 @@
 				target = 0;
 			}
 
+			this._console('Moving forward');
+
 			return this.animate(target);
 		};
 
 		//  Previous is a bit simpler, we can just decrease the index
 		//  by one and check if it's over 0.
 		this.prev = function() {
+			this._console('Moving backwards');
 			return this.animate(this.current - 1);
 		};
 		
@@ -246,7 +333,24 @@
 
 			this._console('Animating horizontally');
 
-			return this.$container.transform('translateX(-' + ((100 / this.total) * to) + '%)');
+			return this.$container._transform('translateX(-' + ((100 / this.total) * to) + '%)');
+		};
+
+
+		//  Fade between slides rather than, uh, sliding it
+		this.animateFade = function(to) {
+			this._console('Fading between slides');
+
+			var $active = this.$slides.removeClass(this.options.lastActiveClass).eq(to);
+			var $prev = $active.prev();
+
+			if(!$prev.length) {
+				$prev = this.$slides.last();
+			}
+
+			//  Toggle our classes
+			$prev.addClass(this.options.lastActiveClass).removeClass(this.options.activeClass);
+			$active.removeClass(this.options.lastActiveClass).addClass(this.options.activeClass);
 		};
 
 
@@ -278,96 +382,36 @@
 		};
 
 		//  Allow daisy-chaining of methods
-		return this.init();
+		return this.init(options);
 	};
 
-	//  Our default option
-	//  You can set these before instantiation by changing
-	//  $.Unslider.defaults['name'] = "whatever";
-	//  but it won't affect any existing sliders.
-	$.Unslider.defaults = {
-		//  Should Unslider throw any errors or warnings?
-		//  (except the jQuery one, that's sort of just there)
-		//  Only accepts a boolean true/false
-		debug: true,
-
-		//  Speeds are set in milliseconds, pass as a number
-		//  or jQuery string: api.jquery.com/animate#duration
-		speed: 300,
-		
-		//  3 second delay between slides moving, pass
-		//  as a number in milliseconds.
-		delay: 3000,
-		
-		//  Does it support keyboard arrows?
-		//  Can pass either true or false -
-		//  or an object with the keycodes, like so:
-		//  {
-		//	 prev: 37,
-		//	 next: 39
-		// }
-		//  You can call any internal method name
-		//  before the keycode and it'll be called.
-		keys: {
-			prev: 37,
-			next: 39
-		},
-		
-		//  Do you want to generate clickable navigation
-		//  to skip to each slide? Only accepts boolean true/false
-		nav: true,
-
-		//  Should there be left/right arrows to go back/forth?
-		//   -> This isn't keyboard support.
-		//  Either set true/false, or an object with the HTML
-		//  elements for each arrow like below:
-		arrows: {
-			prev: '<a class="unslider-arrow prev">Previous slide</a>',
-			next: '<a class="unslider-arrow next">Next slide</a>'
-		},
-		
-		//  Should the slider move on its own or only when
-		//  you interact with the nav/arrows?
-		//  Only accepts boolean true/false.
-		autoplay: false,
-
-		//  How should Unslider animate?
-		//  It can do one of the following types:
-		//  "fade": each slide fades in to each other
-		//  "horizontal": each slide moves from left to right
-		//  "vertical": each slide moves from top to bottom
-		animation: 'horizontal',
-
-		//  jQuery UI easing type
-		//  see jqueryui.com/easing for a full list
-		easing: 'swing',
-
-		//  If you don't want to use a list to display your slides,
-		//  you can change it here. Not recommended and you'll need
-		//  to adjust the CSS accordingly.
-		selectors: {
-			container: 'ul:first',
-			slides: 'li'
-		},
-
-		//  Do you want to animate the heights of each slide as
-		//  it moves
-		animateHeight: true,
-
-		//  Active class for the nav
-		activeClass: 'unslider-active'
+	//  Internal (but global) jQuery methods
+	//  They're both just helpful types of shorthand for
+	//  anything that might take too long to write out or
+	//  something that might be used more than once.
+	$.fn._toggleActive = function(className) {
+		return this.addClass(className).siblings().removeClass(className);
 	};
 
-	$.fn.transform = function(val) {
+	$.fn._transform = function(val) {
 		return this.css({
 			webkitTransform: val, msTransform: val, transform: val
 		});
 	};
-	   
+
+
 	//  And set up our jQuery plugin
 	$.fn.unslider = function(opts) {
 		return this.each(function() {
 			var $this = $(this);
+
+			//  Allow usage of .unslider('function_name')
+			//  as well as using .data('unslider') to access the
+			//  main Unslider object
+			if(typeof opts === 'string' && $this.data('unslider')) {
+				return $.isFunction($this.data('unslider')[opts]) && $this.data('unslider')[opts]();
+			}
+
 			return $this.data('unslider', new $.Unslider($this, opts));
 		});
 	};

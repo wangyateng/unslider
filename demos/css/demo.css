@@ -10,6 +10,16 @@
  */
 @import 'reset.css';
 
+html, body, .unslider {
+	width: 100%;
+	height: 100%;
+}
+
+.unslider {
+	position: relative;
+	clear: both;
+}
+
 /**
  *   1. Shared styling for all demo sliders.
  */
@@ -40,6 +50,15 @@
 	}
 	.my-slider li:nth-child(3) {
 		background: linear-gradient(30deg, #5fbefe, #c8a0f8);
+	}
+	.my-slider li:nth-child(4) {
+		background: linear-gradient(-30deg, #b2dfc8, #6294c6);
+	}
+	.my-slider li:nth-child(5) {
+		background: linear-gradient(30deg, #7e80e7, #8c34c0);
+	}
+	.my-slider li:nth-child(6) {
+		background: linear-gradient(-30deg, #5acee6, #2f82d7);
 	}
 
 

@@ -11,8 +11,19 @@
 		<link rel="stylesheet" href="../src/css/unslider.css">
 	</head>
 	<body>
-		<div class="my-slider">
+		<div class="my-slider my-default-slider">
 			<ul>
+				<li>Here's slide one. It's pretty basic, but you can put <b>whatever</b> you want in these slides.</li>
+				<li data-nav="Slidey">Here's slide two. Only one more to go!</li>
+				<li>Slide three! I'll reward your patience with a cat.<br><img src="//lorempixel.com/output/cats-q-c-200-100-6.jpg"></li>
+			</ul>
+		</div>
+
+		<div class="my-slider my-fade-slider">
+			<ul>
+				<li>Here's slide one. It's pretty basic, but you can put <b>whatever</b> you want in these slides.</li>
+				<li data-nav="Slidey">Here's slide two. Only one more to go!</li>
+				<li>Slide three! I'll reward your patience with a cat.<br><img src="//lorempixel.com/output/cats-q-c-200-100-6.jpg"></li>
 				<li>Here's slide one. It's pretty basic, but you can put <b>whatever</b> you want in these slides.</li>
 				<li data-nav="Slidey">Here's slide two. Only one more to go!</li>
 				<li>Slide three! I'll reward your patience with a cat.<br><img src="//lorempixel.com/output/cats-q-c-200-100-6.jpg"></li>
@@ -42,8 +53,16 @@
 				//  The most basic of Unslider set-ups.
 				//  We're not passing any options or callbacks
 				//  in, so we can just fire it off.
-				window.slider = $('.my-slider').unslider();
-				
+				$('.my-default-slider').unslider();
+
+				//  If we want to use Unslider to fade between
+				//  our slides, we can just pass an animation
+				//  type in the settings, like so:
+				$('.my-fade-slider').unslider({
+					animation: 'fade',
+					debug: true
+				});
+
 				//  Ta-da!
 			});
 		</script>
