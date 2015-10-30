@@ -69,3 +69,10 @@
 	.unslider-arrow.prev {
 		transform: rotate(-180deg);
 	}
+
+.unslider-nav {
+	position: absolute;
+	bottom: 30px;
+	left: 0;
+	right: 0;
+}

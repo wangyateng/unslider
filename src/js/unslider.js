@@ -20,6 +20,7 @@
 		//  Leave our elements blank for now
 		//  Since they get changed by the options, we'll need to
 		//  set them in the init method.
+		this.$parent = null;
 		this.$container = null;
 		this.$slides = null;
 		
@@ -64,6 +65,7 @@
 		this.setup = function() {
 			//  Add a CSS hook to the main element
 			this.$context.addClass('unslider-slider').wrap('<div class="unslider" />');
+			this.$parent = this.$context.parent();
 
 			//  We need to manually check if the container is absolutely
 			//  or relatively positioned
@@ -93,7 +95,40 @@
 
 		//  Set up our navigation
 		this.initNav = function() {
-			// @TODO
+			var $nav = $('<nav class="unslider-nav"><ol /></nav>');
+
+			//  Build our click navigation item-by-item
+			this.$slides.each(function(key) {
+				//  Each slide should have a label
+				var label = 'Slide ' + (key + 1);
+
+				//  If we've already set a label, let's use that
+				//  instead of generating one
+				if(this.getAttribute('data-nav')) {
+					label = this.getAttribute('data-nav');
+				}
+
+				//  And add it to our navigation item
+				$nav.children('ol').append('<li ' + (self.current === key ? 'class="' + self.options.activeClass + '"' : '') + ' data-slide="' + key + '">' + label + '</li>');
+			});
+			
+			//  Now our nav is built, let's add it to the slider and bind
+			//  for any click events on the generated links
+			$nav.insertAfter(this.$context).find('li').on('click' + this.eventSuffix, function() {
+				//  Cache our link and set it to be active
+				var $me = $(this).addClass(self.options.activeClass);
+
+				//  Set the right active class, remove any other ones
+				$me.siblings().removeClass(self.options.activeClass);
+
+				//  Move the slide
+				self.animate($me.attr('data-slide'));
+
+				//  And log it so everyone knows what's going on
+				self._console('Navigation item ' + this.innerText + ' clicked');
+			});
+
+			this._console('Navigation set up');
 		};
 
 
@@ -144,12 +179,24 @@
 			}
 
 			this.current = Math.min(Math.max(0, to), this.total - 1);
+
+			if(this.options.nav) {
+				this.$parent.find('.unslider-nav [data-slide="' + to + '"]').addClass(this.options.activeClass)
+					.siblings().removeClass(self.options.activeClass);
+			}
 		};
 		
 		//  Despite the name, this doesn't do any animation - since there's
 		//  now three different types of animation, we let this method delegate
 		//  to the right type, keeping the name for backwards compat.
 		this.animate = function(to) {
+			//  Animation shortcuts
+			//  Instead of passing a number index, we can now
+			//  use .data('unslider').animate('last');
+			//  to go to the very last slide
+			if(to === 'first') to = 0;
+			if(to === 'last') to = this.total;
+
 			this.setIndex(to);
 
 			//  Delegate the right method - everything's named consistently
@@ -162,12 +209,17 @@
 				return this[fn](this.current);
 			}
 
-			return this._console('Not a valid animation method.', 'warn');
+			return this._console('Not a valid animation method', 'warn');
 		};
 
+
+		//  Shortcuts for animating if we don't know what the current
+		//  index is (i.e back/forward)
+		//  For moving forward we need to make sure we don't overshoot.
 		this.next = function() {
 			var target = this.current + 1;
 
+			//  If we're at the end, we need to move back to the start
 			if(target >= this.total) {
 				target = 0;
 			}
@@ -175,6 +227,8 @@
 			return this.animate(target);
 		};
 
+		//  Previous is a bit simpler, we can just decrease the index
+		//  by one and check if it's over 0.
 		this.prev = function() {
 			return this.animate(this.current - 1);
 		};
@@ -298,7 +352,10 @@
 
 		//  Do you want to animate the heights of each slide as
 		//  it moves
-		animateHeight: true
+		animateHeight: true,
+
+		//  Active class for the nav
+		activeClass: 'unslider-active'
 	};
 
 	$.fn.transform = function(val) {
