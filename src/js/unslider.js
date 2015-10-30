@@ -15,12 +15,12 @@
 
 		//  Store our default options in here
 		//  Everything will be overwritten by the jQuery plugin though
-		this.defaults = {
-			//  Should Unslider throw any errors or warnings?
-			//  (except the jQuery one, that's sort of just there)
-			//  Only accepts a boolean true/false
-			debug: false,
-			
+		self.defaults = {
+			//  Should the slider move on its own or only when
+			//  you interact with the nav/arrows?
+			//  Only accepts boolean true/false.
+			autoplay: false,
+
 			//  3 second delay between slides moving, pass
 			//  as a number in milliseconds.
 			delay: 3000,
@@ -51,11 +51,6 @@
 				prev: '<a class="unslider-arrow prev">Previous slide</a>',
 				next: '<a class="unslider-arrow next">Next slide</a>'
 			},
-			
-			//  Should the slider move on its own or only when
-			//  you interact with the nav/arrows?
-			//  Only accepts boolean true/false.
-			autoplay: false,
 
 			//  How should Unslider animate?
 			//  It can do one of the following types:
@@ -86,36 +81,37 @@
 		};
 
 		//  Set defaults
-		this.$context = context;
-		this.options = {};
+		self.$context = context;
+		self.options = {};
 
 		//  Leave our elements blank for now
 		//  Since they get changed by the options, we'll need to
 		//  set them in the init method.
-		this.$parent = null;
-		this.$container = null;
-		this.$slides = null;
+		self.$parent = null;
+		self.$container = null;
+		self.$slides = null;
 		
 		//  Set our indexes and totals
-		this.total = 0;
-		this.current = 0;
+		self.total = 0;
+		self.current = 0;
 
 		//  Generate a specific random ID so we don't dupe events
-		this.sliderID = ~~(Math.random() * 2e3);
-		this.eventSuffix = '.unslider-' + this.sliderID;
+		self.sliderID = ~~(Math.random() * 2e3);
+		self.prefix = 'unslider-';
+		self.eventSuffix = '.' + self.prefix + self.sliderID;
 
 		//  Get everything set up innit
-		this.init = function(options) {
+		self.init = function(options) {
 			//  Set up our options inside here so we can re-init at
 			//  any time
-			this.options = $.extend(this.defaults, options);
+			self.options = $.extend(self.defaults, options);
 
 			//  Our elements
-			this.$container = this.$context.find(this.options.selectors.container).addClass('unslider-wrap');
-			this.$slides = this.$container.children(this.options.selectors.slides);
+			self.$container = self.$context.find(self.options.selectors.container).addClass(self.prefix + 'wrap');
+			self.$slides = self.$container.children(self.options.selectors.slides);
 
 			//  We'll manually init the container
-			this.setup();
+			self.setup();
 
 			//  We want to keep this script as small as possible
 			//  so we'll optimise some checks
@@ -129,56 +125,53 @@
 
 			//  Add swipe support
 			if(typeof jQuery.event.special['swipe'] !== undefined) {
-				this.initSwipe();
+				self.initSwipe();
 			}
 
-			//  Add our logging
-			this._console('Slider initiated');
-
 			//  Everyday I'm chainin'
-			return this.setIndex(this.current);
+			return self.setIndex(self.current);
 		};
 
-		this.setup = function() {
+		self.setup = function() {
 			//  Add a CSS hook to the main element
-			this.$context.addClass('unslider-slider unslider-' + this.options.animation).wrap('<div class="unslider" />');
-			this.$parent = this.$context.parent();
+			self.$context.addClass(self.prefix + 'slider ' + self.prefix + self.options.animation).wrap('<div class="unslider" />');
+			self.$parent = self.$context.parent();
 
 			//  We need to manually check if the container is absolutely
 			//  or relatively positioned
-			var position = this.$context.css('position');
+			var position = self.$context.css('position');
 			var positions = ['relative', 'absolute'];
 
 			//  If we don't already have a position set, we'll
 			//  automatically set it ourselves
 			if($.inArray(position, positions) < 0) {
-				this.$context.css('position', positions[0]);
+				self.$context.css('position', positions[0]);
 			}
 
-			this.$context.css('overflow', 'hidden');
+			self.$context.css('overflow', 'hidden');
 
 			//  We should be able to recalculate slides at will
-			this.calculateSlides();
+			self.calculateSlides();
 		};
 
 		//  Set up the slide widths to animate with
 		//  so the box doesn't float over
-		this.calculateSlides = function() {
-			this.total = this.$slides.length;
+		self.calculateSlides = function() {
+			self.total = self.$slides.length;
 
 			//  Set the total width
-			if(this.options.animation !== 'fade') {
-				this.$container.css('width', (this.total * 100) + '%').addClass('unslider-carousel');
-				this.$slides.css('width', (100 / this.total) + '%');
+			if(self.options.animation !== 'fade') {
+				self.$container.css('width', (self.total * 100) + '%').addClass(self.prefix + 'carousel');
+				self.$slides.css('width', (100 / self.total) + '%');
 			}
 		};
 
 		//  Set up our navigation
-		this.initNav = function() {
-			var $nav = $('<nav class="unslider-nav"><ol /></nav>');
+		self.initNav = function() {
+			var $nav = $('<nav class="' + self.prefix + 'nav"><ol /></nav>');
 
 			//  Build our click navigation item-by-item
-			this.$slides.each(function(key) {
+			self.$slides.each(function(key) {
 				//  Each slide should have a label
 				var label = 'Slide ' + (key + 1);
 
@@ -194,7 +187,7 @@
 			
 			//  Now our nav is built, let's add it to the slider and bind
 			//  for any click events on the generated links
-			$nav.insertAfter(this.$context).find('li').on('click' + this.eventSuffix, function() {
+			$nav.insertAfter(self.$context).find('li').on('click' + self.eventSuffix, function() {
 				//  Cache our link and set it to be active
 				var $me = $(this).addClass(self.options.activeClass);
 
@@ -203,42 +196,33 @@
 
 				//  Move the slide
 				self.animate($me.attr('data-slide'));
-
-				//  And log it so everyone knows what's going on
-				self._console('Navigation item ' + this.innerText + ' clicked');
 			});
-
-			this._console('Navigation set up');
 		};
 
 
 		//  Set up our left-right arrow navigation
 		//  (Not keyboard arrows, prev/next buttons)
-		this.initArrows = function() {
-			if(this.options.arrows === true) {
-				this.options.arrows = $.Unslider.defaults.arrows;
+		self.initArrows = function() {
+			if(self.options.arrows === true) {
+				self.options.arrows = $.Unslider.defaults.arrows;
 			}
-
-			this._console('Arrows set up');
 
 			//  Loop our options object and bind our events
 			$.each(self.options.arrows, function(key, val) {
 				//  Add our arrow HTML and bind it
-				$(val).insertAfter(self.$context).on('click' + self.eventSuffix, $.proxy(self[key], self));
+				$(val).insertAfter(self.$context).on('click' + self.eventSuffix, self[key]);
 			});
 		};
 
 
 		//  Set up our keyboad navigation
 		//  Allow binding to multiple keycodes
-		this.initKeys = function() {
-			if(this.options.keys === true) {
-				this.options.keys = $.Unslider.defaults.keys;
+		self.initKeys = function() {
+			if(self.options.keys === true) {
+				self.options.keys = $.Unslider.defaults.keys;
 			}
 
-			this._console('Keyboard shortcuts set up');
-
-			$(document).on('keyup' + this.eventSuffix, function(e) {
+			$(document).on('keyup' + self.eventSuffix, function(e) {
 				$.each(self.options.keys, function(key, val) {
 					if(e.which === val) {
 						$.isFunction(self[key]) && self[key].call(self);
@@ -249,12 +233,12 @@
 
 		//  Requires jQuery.event.swipe
 		//  -> stephband.info/jquery.event.swipe
-		this.initSwipe = function() {
-			var width = this.$slides.width();
+		self.initSwipe = function() {
+			var width = self.$slides.width();
 
-			this.$container.on({
-				swipeleft: $.proxy(this.next, this),
-				swiperight: $.proxy(this.prev, this),
+			self.$container.on({
+				swipeleft: self.next,
+				swiperight: self.prev,
 
 				movestart: function(e) {
 					//  If the movestart heads off in a upwards or downwards
@@ -264,53 +248,44 @@
 					}
 
 					self.$container.css('position', 'relative');
-				},
-
-				//  We don't want to have a tactile swipe in the slider
-				//  in the fade animation, as it can cause some problems
-				//  with layout, so we'll just disable it.
-				move: function(e) {
-					if(this.options.animation !== 'fade') {
-						return;
-					}
-
-					self.$container.css('left', (100 * e.distX / width) + '%');
-				},
-
-				moveend: function(e) {
-					if(this.options.animation !== 'fade') {
-						return;
-					}
-
-					self.$container.animate({left: 0}, 200);
 				}
-			})
+			});
+
+			//  We don't want to have a tactile swipe in the slider
+			//  in the fade animation, as it can cause some problems
+			//  with layout, so we'll just disable it.
+			if(self.options.animation !== 'fade') {
+				self.$container.on({
+					move: function(e) {
+						self.$container.css('left', (100 * e.distX / width) + '%');
+					},
+
+					moveend: function(e) {
+						self.$container.animate({left: 0}, 200);
+					}
+				});
+			}
 		};
 
 		//  Unset the keyboard navigation
 		//  Remove the handler 
-		this.destroyKeys = function() {
+		self.destroyKeys = function() {
 			//  Remove the event handler
-			$(document).off('keyup' + this.eventSuffix);
-
-			//  And let us know all about it
-			this._console('Keyboard shortcuts removed');
+			$(document).off('keyup' + self.eventSuffix);
 		};
 
-		this.setIndex = function(to) {
-			this._console('Current slide index updated to ' + to);
-
+		self.setIndex = function(to) {
 			if(to < 0) {
-				to = this.total - 1;
+				to = self.total - 1;
 			}
 
-			this.current = Math.min(Math.max(0, to), this.total - 1);
+			self.current = Math.min(Math.max(0, to), self.total - 1);
 
-			if(this.options.nav) {
-				this.$parent.find('.unslider-nav [data-slide="' + to + '"]')._toggleActive(this.options.activeClass);
+			if(self.options.nav) {
+				self.$parent.find('.' + self.prefix + 'nav [data-slide="' + to + '"]')._toggleActive(self.options.activeClass);
 			}
 
-			this.$slides.eq(this.current)._toggleActive(this.options.activeClass);
+			self.$slides.eq(self.current)._toggleActive(self.options.activeClass);
 
 			return this;
 		};
@@ -318,121 +293,89 @@
 		//  Despite the name, this doesn't do any animation - since there's
 		//  now three different types of animation, we let this method delegate
 		//  to the right type, keeping the name for backwards compat.
-		this.animate = function(to, dir) {
+		self.animate = function(to, dir) {
 			//  Animation shortcuts
 			//  Instead of passing a number index, we can now
 			//  use .data('unslider').animate('last');
 			//  to go to the very last slide
 			if(to === 'first') to = 0;
-			if(to === 'last') to = this.total;
+			if(to === 'last') to = self.total;
 
-			this.setIndex(to);
+			self.setIndex(to);
 
 			//  Delegate the right method - everything's named consistently
 			//  so we can assume it'll be called "animate" + 
-			var fn = 'animate' + this._ucfirst(this.options.animation);
+			var fn = 'animate' + self._ucfirst(self.options.animation);
 
 			//  Make sure it's a valid animation method, otherwise we'll get
 			//  a load of bug reports that'll be really hard to report
 			if($.isFunction(this[fn])) {
-				return this[fn](this.current, dir);
+				return this[fn](self.current, dir);
 			}
 
-			return this._console('Not a valid animation method', 'warn');
+			return;
 		};
 
 
 		//  Shortcuts for animating if we don't know what the current
 		//  index is (i.e back/forward)
 		//  For moving forward we need to make sure we don't overshoot.
-		this.next = function() {
-			var target = this.current + 1;
+		self.next = function() {
+			var target = self.current + 1;
 
 			//  If we're at the end, we need to move back to the start
-			if(target >= this.total) {
+			if(target >= self.total) {
 				target = 0;
 			}
 
-			this._console('Moving forward');
-
-			return this.animate(target, 'next');
+			return self.animate(target, 'next');
 		};
 
 		//  Previous is a bit simpler, we can just decrease the index
 		//  by one and check if it's over 0.
-		this.prev = function() {
-			this._console('Moving backwards');
-			return this.animate(this.current - 1, 'prev');
+		self.prev = function() {
+			return self.animate(self.current - 1, 'prev');
 		};
 		
 
 		//  Our default animation method, the old-school left-to-right
 		//  horizontal animation
-		this.animateHorizontal = function(to) {
-			if(this.options.animateHeight) {
-				var height = this.$slides.eq(to).height();
+		self.animateHorizontal = function(to) {
+			if(self.options.animateHeight) {
+				var height = self.$slides.eq(to).height();
 
-				this._console('Adjusting container height to ' + height);
-				this.$context.css('height', height);
+				self.$context.css('height', height);
 			}
 
-			this._console('Animating horizontally');
-
-			return this.$container._transform('translateX(-' + ((100 / this.total) * to) + '%)');
+			return self.$container._transform('translateX(-' + ((100 / self.total) * to) + '%)');
 		};
 
 
 		//  Fade between slides rather than, uh, sliding it
-		this.animateFade = function(to, dir) {
-			this._console('Fading between slides');
-
-			var $active = this.$slides.removeClass(this.options.lastActiveClass).eq(to);
+		self.animateFade = function(to, dir) {
+			var $active = self.$slides.removeClass(self.options.lastActiveClass).eq(to);
 			var $prev = $active.prev();
 
 			if(!$prev.length) {
-				$prev = this.$slides.last();
+				$prev = self.$slides.last();
 			}
 
 			if(dir === 'prev') {
-				var $next = $active.next();
-
-				if(!$next.length) {
-					$next = this.$slides.first();
-				}
-
-				console.log($next);
-
-				$prev = $prev.add($next);
+				//  @TODO: fix fading backwards
 			}
 
-			console.log($prev);
-
 			//  Toggle our classes
-			$prev.addClass(this.options.lastActiveClass).removeClass(this.options.activeClass);
-			$active.removeClass(this.options.lastActiveClass).addClass(this.options.activeClass);
+			$prev.addClass(self.options.lastActiveClass).removeClass(self.options.activeClass);
+			$active.removeClass(self.options.lastActiveClass).addClass(self.options.activeClass);
 		};
 
 
 		//  Everything beginning with _ is a helper method and shouldn't be
 		//  used externally if you can jolly well help it.
-		this._console = function(msg, type) {
-			//  If we've not got console support or debugging is turned off
-			//  this is all a bit of a waste so we'll just leave it here.
-			if(this.options.debug !== true || typeof window.console !== "object") {
-				return;
-			}
-
-			//  Set a default console type. It's more than likely going to be
-			//  console.log() but we have some errors and what not as well.
-			type = type || 'log';
-
-			//  And that's our little wrapper. Very neat.
-			return console[type]('Unslider: ' + msg);
-		};
 
 		//  Unfortunately JavaScript doesn't have a ucfirst() function
 		//  (one of the good things about PHP!) so this is a workaround for that
-		this._ucfirst = function(str) {
+		self._ucfirst = function(str) {
 			//  Take our variable, run a regex on the first letter
 			return str.toString().toLowerCase().replace(/^./, function(match) {
 				//  And uppercase it. Simples.
@@ -441,7 +384,7 @@
 		};
 
 		//  Allow daisy-chaining of methods
-		return this.init(options);
+		return self.init(options);
 	};
 
 	//  Internal (but global) jQuery methods
@@ -457,7 +400,6 @@
 			webkitTransform: val, msTransform: val, transform: val
 		});
 	};
-
 
 	//  And set up our jQuery plugin
 	$.fn.unslider = function(opts) {
