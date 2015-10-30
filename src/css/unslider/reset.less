@@ -1,9 +1,16 @@
 .unslider {
-	position: relative;
+	//  Should either be relative or absolute
+	//  as long as it's not static, but we'll
+	//  set it using jQuery
+	// position: relative;
 	overflow: auto;
 
 	ul {
 		position: relative;
+
+		-webkit-transition: -webkit-transform @unslider-transition-speed @unslider-transition-function;
+		-ms-transition: -ms-transform @unslider-transition-speed @unslider-transition-function;
+		transition: transform @unslider-transition-speed @unslider-transition-function;
 		
 		li {
 			float: left;

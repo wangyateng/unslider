@@ -12,11 +12,13 @@
  *   stuff. Here be dragons and all that.
  */
 .unslider {
-  position: relative;
   overflow: auto;
 }
 .unslider ul {
   position: relative;
+  -webkit-transition: -webkit-transform 0.4s cubic-bezier(0.42, 0, 0.58, 1);
+  -ms-transition: -ms-transform 0.4s cubic-bezier(0.42, 0, 0.58, 1);
+  transition: transform 0.4s cubic-bezier(0.42, 0, 0.58, 1);
 }
 .unslider ul li {
   float: left;
@@ -27,4 +29,9 @@
   margin: 0;
   padding: 0;
   border: none;
+}
+.unslider {
+  -webkit-transition: height 0.4s cubic-bezier(0.42, 0, 0.58, 1);
+  -ms-transition: height 0.4s cubic-bezier(0.42, 0, 0.58, 1);
+  transition: height 0.4s cubic-bezier(0.42, 0, 0.58, 1);
 }

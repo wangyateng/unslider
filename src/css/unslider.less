@@ -7,8 +7,18 @@
  *   hardware-accelerated goodness.
  */
  
-@unslider-transition-speed:				0.4s;	//  How fast you'd like the slides to move between each other
-@unslider-dot-navigation:				false;	//  Unslider 2 has navigation styles pre-designed. You can turn it off here.
+//  How fast you'd like the slides to move between each other
+@unslider-transition-speed: 0.4s;
+
+//  Unslider 2 has navigation styles pre-designed. You can turn it off here.
+@unslider-transition-height: true;
+
+
+//  Unslider 2 has navigation styles pre-designed. You can turn it off here.
+@unslider-dot-navigation: false;
+
+//  Unslider 2 has navigation styles pre-designed. You can turn it off here.
+@unslider-transition-function: cubic-bezier(.42,0,.58,1);
 
 
 /**
@@ -21,3 +31,7 @@
 //  Unfortunately, LESS isn't great at conditionals
 .use-dots() when (@unslider-dot-navigation = true) { @import 'unslider/dots'; }
 .use-dots();
+
+//  Unfortunately, LESS isn't great at conditionals
+.transition-height() when (@unslider-transition-height = true) { @import 'unslider/transition-height'; }
+.transition-height();

@@ -13,3 +13,31 @@
 /**
  *   1. Shared styling for all demo sliders.
  */
+.my-slider {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+
+	width: 800px;
+	height: 200px;
+	transform: translateX(-50%) translateY(-50%);
+
+	text-align: center;
+	line-height: 200px;
+}
+	.my-slider li {
+		color: #fff;
+		text-shadow: 0 2px 4px rgba(0,0,0,.2);
+
+		border-radius: 8px;
+	}
+
+	.my-slider li:nth-child(1) {
+		background: linear-gradient(30deg, #ff6a31, #fec95f);
+	}
+	.my-slider li:nth-child(2) {
+		background: linear-gradient(-30deg, #7dd7be, #4399e2);
+	}
+	.my-slider li:nth-child(3) {
+		background: linear-gradient(30deg, #5fbefe, #c8a0f8);
+	}

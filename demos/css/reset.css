@@ -19,16 +19,3 @@ body {
 	color: #737077;
 	background: #2e2836;
 }
-
-.unslider {
-	position: absolute;
-	left: 50%;
-	top: 50%;
-	
-	width: 900px;
-	transform: translateX(-50%) translateY(-50%);
-	
-	background: #f0efed;
-	box-shadow: 0 6px 20px rgba(0,0,0,.1);
-	border-radius: 6px;
-}
