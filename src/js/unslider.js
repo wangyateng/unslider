@@ -308,7 +308,7 @@
 			self.current = Math.min(Math.max(0, to), self.total - 1);
 
 			if(self.options.nav) {
-				self.$parent.find('.' + self.prefix + 'nav [data-slide="' + to + '"]')._toggleActive(self.options.activeClass);
+				self.$parent.find('.' + self.prefix + 'nav [data-slide="' + self.current + '"]')._toggleActive(self.options.activeClass);
 			}
 
 			self.$slides.eq(self.current)._toggleActive(self.options.activeClass);
