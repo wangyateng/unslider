@@ -73,7 +73,7 @@
 
 			//  Do you want to animate the heights of each slide as
 			//  it moves
-			animateHeight: true,
+			animateHeight: false,
 
 			//  Active class for the nav
 			activeClass: 'unslider-active',
@@ -136,7 +136,7 @@
 			self.options.autoplay && self.start();
 
 			//  Everyday I'm chainin'
-			return self.setIndex(self.current);
+			return self.animate(self.options.index || self.current);
 		};
 
 		self.setup = function() {
@@ -313,7 +313,7 @@
 
 			self.$slides.eq(self.current)._toggleActive(self.options.activeClass);
 
-			return this;
+			return self;
 		};
 		
 		//  Despite the name, this doesn't do any animation - since there's
@@ -329,6 +329,9 @@
 
 			self.setIndex(to);
 
+			//  Add a callback method to do stuff with
+			self.$context.trigger('unslider.change', to);
+
 			//  Delegate the right method - everything's named consistently
 			//  so we can assume it'll be called "animate" + 
 			var fn = 'animate' + self._ucfirst(self.options.animation);
@@ -336,8 +339,10 @@
 			//  Make sure it's a valid animation method, otherwise we'll get
 			//  a load of bug reports that'll be really hard to report
 			if($.isFunction(self[fn])) {
-				return self[fn](self.current, dir);
+				self[fn](self.current, dir);
 			}
+
+			return self;
 		};
 
 
@@ -437,13 +442,14 @@
 				opts = opts.split(':');
 
 				var fn = opts[0];
+				var call = $this.data('unslider')[fn];
 
 				if(opts[1]) {
 					var args = opts[1].split(',');
-					return $.isFunction($this.data('unslider')[fn]) && $this.data('unslider')[fn].apply($this, args);
+					return $.isFunction(call) && call.apply($this, args);
 				}
 
-				return $.isFunction($this.data('unslider')[fn]) && $this.data('unslider')[fn]();
+				return $.isFunction(call) && call();
 			}
 
 			return $this.data('unslider', new $.Unslider($this, opts));
