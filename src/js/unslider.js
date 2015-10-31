@@ -100,6 +100,9 @@
 		self.prefix = 'unslider-';
 		self.eventSuffix = '.' + self.prefix + self.sliderID;
 
+		//  In case we're going to use the autoplay
+		self.interval = null;
+
 		//  Get everything set up innit
 		self.init = function(options) {
 			//  Set up our options inside here so we can re-init at
@@ -127,6 +130,10 @@
 			if(typeof jQuery.event.special['swipe'] !== undefined) {
 				self.initSwipe();
 			}
+
+			//  If autoplay is set to true, call self.start()
+			//  to start calling our timeouts
+			self.options.autoplay && self.start();
 
 			//  Everyday I'm chainin'
 			return self.setIndex(self.current);
@@ -165,6 +172,25 @@
 				self.$slides.css('width', (100 / self.total) + '%');
 			}
 		};
+
+
+		//  Start our autoplay
+		self.start = function() {
+			self.interval = setTimeout(function() {
+				//  Move on to the next slide
+				self.next();
+
+				//  And restart our timeout
+				self.start();
+			}, self.options.delay);
+		};
+
+		//  And pause our timeouts
+		//  and force stop the slider if needed
+		self.stop = function() {
+			clearTimeout(self.interval);
+		};
+
 
 		//  Set up our navigation
 		self.initNav = function() {
@@ -309,11 +335,9 @@
 
 			//  Make sure it's a valid animation method, otherwise we'll get
 			//  a load of bug reports that'll be really hard to report
-			if($.isFunction(this[fn])) {
-				return this[fn](self.current, dir);
+			if($.isFunction(self[fn])) {
+				return self[fn](self.current, dir);
 			}
-
-			return;
 		};
 
 
@@ -410,7 +434,16 @@
 			//  as well as using .data('unslider') to access the
 			//  main Unslider object
 			if(typeof opts === 'string' && $this.data('unslider')) {
-				return $.isFunction($this.data('unslider')[opts]) && $this.data('unslider')[opts]();
+				opts = opts.split(':');
+
+				var fn = opts[0];
+
+				if(opts[1]) {
+					var args = opts[1].split(',');
+					return $.isFunction($this.data('unslider')[fn]) && $this.data('unslider')[fn].apply($this, args);
+				}
+
+				return $.isFunction($this.data('unslider')[fn]) && $this.data('unslider')[fn]();
 			}
 
 			return $this.data('unslider', new $.Unslider($this, opts));
