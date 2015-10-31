@@ -59,10 +59,6 @@
 			//  "vertical": each slide moves from top to bottom
 			animation: 'horizontal',
 
-			//  jQuery UI easing type
-			//  see jqueryui.com/easing for a full list
-			easing: 'swing',
-
 			//  If you don't want to use a list to display your slides,
 			//  you can change it here. Not recommended and you'll need
 			//  to adjust the CSS accordingly.
