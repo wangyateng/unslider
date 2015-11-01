@@ -73,7 +73,10 @@
 
 			//  Active class for the nav
 			activeClass: 'unslider-active',
-			lastActiveClass: 'unslider-last-active'
+			lastActiveClass: 'unslider-last-active',
+
+			//  What slide do you want to start at?
+			index: 0
 		};
 
 		//  Set defaults
@@ -86,6 +89,8 @@
 		self.$parent = null;
 		self.$container = null;
 		self.$slides = null;
+		self.$nav = null;
+		self.$arrows = [];
 		
 		//  Set our indexes and totals
 		self.total = 0;
@@ -131,6 +136,9 @@
 			//  to start calling our timeouts
 			self.options.autoplay && self.start();
 
+			//  Listen to a ready event
+			self.$context.trigger('unslider.ready');
+
 			//  Everyday I'm chainin'
 			return self.animate(self.options.index || self.current);
 		};
@@ -138,7 +146,7 @@
 		self.setup = function() {
 			//  Add a CSS hook to the main element
 			self.$context.addClass(self.prefix + 'slider ' + self.prefix + self.options.animation).wrap('<div class="unslider" />');
-			self.$parent = self.$context.parent();
+			self.$parent = self.$context.parent('.unslider');
 
 			//  We need to manually check if the container is absolutely
 			//  or relatively positioned
@@ -172,6 +180,10 @@
 
 		//  Start our autoplay
 		self.start = function() {
+			if(self.interval) {
+				return;
+			}
+
 			self.interval = setTimeout(function() {
 				//  Move on to the next slide
 				self.next();
@@ -207,9 +219,12 @@
 				$nav.children('ol').append('<li data-slide="' + key + '">' + label + '</li>');
 			});
 			
+			//  Keep a copy of the nav everywhere so we can use it
+			self.$nav = $nav.insertAfter(self.$context);
+
 			//  Now our nav is built, let's add it to the slider and bind
 			//  for any click events on the generated links
-			$nav.insertAfter(self.$context).find('li').on('click' + self.eventSuffix, function() {
+			self.$nav.find('li').on('click' + self.eventSuffix, function() {
 				//  Cache our link and set it to be active
 				var $me = $(this).addClass(self.options.activeClass);
 
@@ -232,7 +247,9 @@
 			//  Loop our options object and bind our events
 			$.each(self.options.arrows, function(key, val) {
 				//  Add our arrow HTML and bind it
-				$(val).insertAfter(self.$context).on('click' + self.eventSuffix, self[key]);
+				self.$arrows.push(
+					$(val).insertAfter(self.$context).on('click' + self.eventSuffix, self[key])
+				);
 			});
 		};
 
@@ -289,6 +306,24 @@
 			}
 		};
 
+		//  Remove any trace of arrows
+		//  Loop our array of arrows and use jQuery to remove
+		//  It'll unbind any event handlers for us
+		self.destroyArrows = function() {
+			self.$arrows.forEach(function($arrow) {
+				$arrow.remove();
+			})
+		};
+
+		//  Remove any swipe events and reset the position
+		self.destroySwipe = function() {
+			//  We bind to 4 events, so we'll unbind those
+			self.$container.off('movestart swipeleft move moveend')
+			//  If this was called mid-swipe we need to reset
+			//  the swipe position as well. Can do that here.
+				.css('left', 0);
+		};
+
 		//  Unset the keyboard navigation
 		//  Remove the handler 
 		self.destroyKeys = function() {
@@ -304,7 +339,7 @@
 			self.current = Math.min(Math.max(0, to), self.total - 1);
 
 			if(self.options.nav) {
-				self.$parent.find('.' + self.prefix + 'nav [data-slide="' + self.current + '"]')._toggleActive(self.options.activeClass);
+				self.$nav.find('[data-slide="' + self.current + '"]')._toggleActive(self.options.activeClass);
 			}
 
 			self.$slides.eq(self.current)._toggleActive(self.options.activeClass);
@@ -326,7 +361,7 @@
 			self.setIndex(to);
 
 			//  Add a callback method to do stuff with
-			self.$context.trigger('unslider.change', to);
+			self.$context.trigger('unslider.change', [to, self.$slides.eq(to)]);
 
 			//  Delegate the right method - everything's named consistently
 			//  so we can assume it'll be called "animate" + 

@@ -1,0 +1,14 @@
+@import 'variables';
+
+@unslider-dot-navigation: true;
+
+//  Unfortunately, LESS isn't great at conditionals
+.use-dots() when (@unslider-dot-navigation = true) { @import 'unslider/dots'; }
+.use-dots();
+
+//  You can also import dots directly yourself to use
+//  in a more specific selector, like so:
+// #demo {
+// 	.use-dots() when (@unslider-dot-navigation = true) { @import 'unslider/dots'; }
+// 	.use-dots();
+// }
