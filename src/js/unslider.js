@@ -180,10 +180,6 @@
 
 		//  Start our autoplay
 		self.start = function() {
-			if(self.interval) {
-				return;
-			}
-
 			self.interval = setTimeout(function() {
 				//  Move on to the next slide
 				self.next();
