@@ -7,11 +7,14 @@
 (function($) {
 	//  Don't throw errors if we haven't included jQuery
 	if(!$) {
-		return alert('Unslider requires jQuery to function. Make sure you\'ve included jQuery in the source code before Unslider.');
+		return window.alert('Unslider requires jQuery!');
 	}
 
 	$.Unslider = function(context, options) {
 		var self = this;
+
+		//  Create an Unslider reference we can use everywhere
+		self._ = 'unslider';
 
 		//  Store our default options in here
 		//  Everything will be overwritten by the jQuery plugin though
@@ -24,6 +27,13 @@
 			//  3 second delay between slides moving, pass
 			//  as a number in milliseconds.
 			delay: 3000,
+
+			//  Animation speed in millseconds
+			speed: 750,
+
+			//  An easing string to use. If you're using Velocity, use a
+			//  Velocity string otherwise you can use jQuery/jQ UI options.
+			easing: 'swing', // [.42, 0, .58, 1],
 			
 			//  Does it support keyboard arrows?
 			//  Can pass either true or false -
@@ -40,7 +50,8 @@
 			},
 			
 			//  Do you want to generate clickable navigation
-			//  to skip to each slide? Only accepts boolean true/false
+			//  to skip to each slide? Accepts boolean true/false or
+			//  a callback function per item to generate.
 			nav: true,
 
 			//  Should there be left/right arrows to go back/forth?
@@ -72,11 +83,8 @@
 			animateHeight: false,
 
 			//  Active class for the nav
-			activeClass: 'unslider-active',
-			lastActiveClass: 'unslider-last-active',
-
-			//  What slide do you want to start at?
-			index: 0
+			activeClass: self._ + '-active',
+			lastActiveClass: self._ + '-last-active'
 		};
 
 		//  Set defaults
@@ -98,7 +106,7 @@
 
 		//  Generate a specific random ID so we don't dupe events
 		self.sliderID = ~~(Math.random() * 2e3);
-		self.prefix = 'unslider-';
+		self.prefix = self._ + '-';
 		self.eventSuffix = '.' + self.prefix + self.sliderID;
 
 		//  In case we're going to use the autoplay
@@ -119,16 +127,12 @@
 
 			//  We want to keep this script as small as possible
 			//  so we'll optimise some checks
-			['nav', 'arrows', 'keys'].forEach(function(module) {
-				//  If it's not explicitly set to be false, let's call it
-				//  otherwise we'll assume it's turned off.
-				if(self.options[module] !== false) {
-					self['init' + self._ucfirst(module)]();
-				}
+			['nav', 'arrows', 'keys', 'infinite'].forEach(function(module) {
+				self.options[module] && self['init' + $._ucfirst(module)]();
 			});
 
 			//  Add swipe support
-			if(typeof jQuery.event.special['swipe'] !== undefined) {
+			if(typeof jQuery.event.special.swipe !== undefined) {
 				self.initSwipe();
 			}
 
@@ -136,8 +140,11 @@
 			//  to start calling our timeouts
 			self.options.autoplay && self.start();
 
+			//  We should be able to recalculate slides at will
+			self.calculateSlides();
+
 			//  Listen to a ready event
-			self.$context.trigger('unslider.ready');
+			self.$context.trigger(self._ + '.ready');
 
 			//  Everyday I'm chainin'
 			return self.animate(self.options.index || self.current);
@@ -145,8 +152,8 @@
 
 		self.setup = function() {
 			//  Add a CSS hook to the main element
-			self.$context.addClass(self.prefix + 'slider ' + self.prefix + self.options.animation).wrap('<div class="unslider" />');
-			self.$parent = self.$context.parent('.unslider');
+			self.$context.addClass(self.prefix + 'slider ' + self.prefix + self.options.animation).wrap('<div class="' + self._ + '" />');
+			self.$parent = self.$context.parent('.' + self._);
 
 			//  We need to manually check if the container is absolutely
 			//  or relatively positioned
@@ -160,9 +167,6 @@
 			}
 
 			self.$context.css('overflow', 'hidden');
-
-			//  We should be able to recalculate slides at will
-			self.calculateSlides();
 		};
 
 		//  Set up the slide widths to animate with
@@ -202,13 +206,13 @@
 
 			//  Build our click navigation item-by-item
 			self.$slides.each(function(key) {
-				//  Each slide should have a label
-				var label = 'Slide ' + (key + 1);
-
 				//  If we've already set a label, let's use that
 				//  instead of generating one
-				if(this.getAttribute('data-nav')) {
-					label = this.getAttribute('data-nav');
+				var label = this.getAttribute('data-nav') || key + 1;
+
+				//  Listen to any callback functions
+				if($.isFunction(self.options.nav)) {
+					label = self.options.nav(key, label);
 				}
 
 				//  And add it to our navigation item
@@ -295,12 +299,43 @@
 						self.$container.css('left', (100 * e.distX / width) + '%');
 					},
 
-					moveend: function(e) {
+					moveend: function() {
 						self.$container.animate({left: 0}, 200);
 					}
 				});
 			}
 		};
+
+		//  Infinite scrolling is a massive pain in the arse
+		//  so we need to create a whole bloody function to set
+		//  it up. Argh.
+		self.initInfinite = function() {
+			var pos = ['first', 'last'];
+
+			pos.forEach(function(item, index) {
+				self.$slides.push.apply(
+					self.$slides,
+					
+					//  Exclude all cloned slides and call .first() or .last()
+					//  depending on what `item` is.
+					self.$slides.filter(':not(".' + self._ + '-cloned")')[item]()
+
+					//  Make a copy of it and identify it as a clone
+					.clone().addClass(self._ + '-cloned')
+
+					//  Either insert before or after depending on whether we're
+					//  the first or last clone
+					['insert' + (index === 0 ? 'After' : 'Before')](
+						//  Return the other element in the position array
+						//  if item = first, return "last"
+						self.$slides[pos[~~!index]]()
+					)
+				);
+			});
+
+			//  So then we need to hide the first slide
+			self.$container.css('margin-left', '-100%');
+		}
 
 		//  Remove any trace of arrows
 		//  Loop our array of arrows and use jQuery to remove
@@ -308,7 +343,7 @@
 		self.destroyArrows = function() {
 			self.$arrows.forEach(function($arrow) {
 				$arrow.remove();
-			})
+			});
 		};
 
 		//  Remove any swipe events and reset the position
@@ -354,14 +389,19 @@
 			if(to === 'first') to = 0;
 			if(to === 'last') to = self.total;
 
+			//  Don't animate if it's not a valid index
+			if(isNaN(to)) {
+				return self;
+			}
+
 			self.setIndex(to);
 
 			//  Add a callback method to do stuff with
-			self.$context.trigger('unslider.change', [to, self.$slides.eq(to)]);
+			self.$context.trigger(self._ + '.change', [to, self.$slides.eq(to)]);
 
 			//  Delegate the right method - everything's named consistently
 			//  so we can assume it'll be called "animate" + 
-			var fn = 'animate' + self._ucfirst(self.options.animation);
+			var fn = 'animate' + $._ucfirst(self.options.animation);
 
 			//  Make sure it's a valid animation method, otherwise we'll get
 			//  a load of bug reports that'll be really hard to report
@@ -396,14 +436,50 @@
 
 		//  Our default animation method, the old-school left-to-right
 		//  horizontal animation
-		self.animateHorizontal = function(to) {
+		self.animateHorizontal = function(to, dir) {
 			if(self.options.animateHeight) {
 				var height = self.$slides.eq(to).height();
 
 				self.$context.css('height', height);
 			}
 
-			return self.$container._transform('translateX(-' + ((100 / self.total) * to) + '%)');
+			if(self.options.infinite) {
+				var dummy;
+
+				//  Going backwards to last slide
+				if(to === self.total - 1) {
+					//  We're setting a dummy position and an actual one
+					//  the dummy is what the index looks like
+					//  (and what we'll silently update to afterwards),
+					//  and the actual is what makes it not go backwards
+					dummy = self.total - 3;
+					to = -1;
+				}
+
+				//  Going forwards to first slide
+				if(to === self.total - 2) {
+					dummy = 0;
+					to = self.total - 2;
+				}
+
+				//  If it's a number we can safely set it
+				if(typeof dummy === 'number') {
+					self.setIndex(dummy);
+
+					//  Listen for when the slide's finished transitioning so
+					//  we can silently move it into the right place and clear
+					//  this whole mess up.
+					self.$context.on(self._ + '.moved', function() {
+						if(self.current === dummy) {
+							self.$container.css('left', -(100 * dummy) + '%').off(self._ + '.moved');
+						}
+					});
+				}
+			}
+
+			return self.$container._move({left: -(100 * to) + '%'}, self.options.speed, self.options.easing, function() {
+				self.$context.trigger(self._ + '.moved');
+			});
 		};
 
 
@@ -425,20 +501,6 @@
 			$active.removeClass(self.options.lastActiveClass).addClass(self.options.activeClass);
 		};
 
-
-		//  Everything beginning with _ is a helper method and shouldn't be
-		//  used externally if you can jolly well help it.
-
-		//  Unfortunately JavaScript doesn't have a ucfirst() function
-		//  (one of the good things about PHP!) so this is a workaround for that
-		self._ucfirst = function(str) {
-			//  Take our variable, run a regex on the first letter
-			return str.toString().toLowerCase().replace(/^./, function(match) {
-				//  And uppercase it. Simples.
-				return match.toUpperCase();
-			});
-		};
-
 		//  Allow daisy-chaining of methods
 		return self.init(options);
 	};
@@ -451,11 +513,26 @@
 		return this.addClass(className).siblings().removeClass(className);
 	};
 
-	$.fn._transform = function(val) {
-		return this.css({
-			webkitTransform: val, msTransform: val, transform: val
+	//  The equivalent to PHP's ucfirst(). Take the first
+	//  character of a string and make it uppercase.
+	//  Simples.
+	$._ucfirst = function(str) {
+		//  Take our variable, run a regex on the first letter
+		return str.toString().toLowerCase().replace(/^./, function(match) {
+			//  And uppercase it. Simples.
+			return match.toUpperCase();
 		});
 	};
+
+	$.fn._move = function() {
+		this.stop(true, true);
+
+		if($.fn.velocity) {
+			return $.fn.velocity.apply(this, arguments);
+		}
+
+		return $.fn.animate.apply(this, arguments);
+	}
 
 	//  And set up our jQuery plugin
 	$.fn.unslider = function(opts) {
