@@ -5,9 +5,9 @@
  */
  
 (function($) {
-	//  Don't throw errors if we haven't included jQuery
+	//  Don't throw any errors when jQuery
 	if(!$) {
-		return window.alert('Unslider requires jQuery!');
+		return console.warn('Unslider needs jQuery');
 	}
 
 	$.Unslider = function(context, options) {
@@ -59,8 +59,8 @@
 			//  Either set true/false, or an object with the HTML
 			//  elements for each arrow like below:
 			arrows: {
-				prev: '<a class="unslider-arrow prev">Previous slide</a>',
-				next: '<a class="unslider-arrow next">Next slide</a>'
+				prev: '<a class="' + self._ + '-arrow prev">Previous</a>',
+				next: '<a class="' + self._ + '-arrow next">Next</a>'
 			},
 
 			//  How should Unslider animate?
@@ -105,9 +105,8 @@
 		self.current = 0;
 
 		//  Generate a specific random ID so we don't dupe events
-		self.sliderID = ~~(Math.random() * 2e3);
 		self.prefix = self._ + '-';
-		self.eventSuffix = '.' + self.prefix + self.sliderID;
+		self.eventSuffix = '.' + self.prefix + ~~(Math.random() * 2e3);
 
 		//  In case we're going to use the autoplay
 		self.interval = null;
@@ -116,7 +115,7 @@
 		self.init = function(options) {
 			//  Set up our options inside here so we can re-init at
 			//  any time
-			self.options = $.extend(self.defaults, options);
+			self.options = $.extend({}, self.defaults, options);
 
 			//  Our elements
 			self.$container = self.$context.find(self.options.selectors.container).addClass(self.prefix + 'wrap');
@@ -158,12 +157,11 @@
 			//  We need to manually check if the container is absolutely
 			//  or relatively positioned
 			var position = self.$context.css('position');
-			var positions = ['relative', 'absolute'];
 
 			//  If we don't already have a position set, we'll
 			//  automatically set it ourselves
-			if($.inArray(position, positions) < 0) {
-				self.$context.css('position', positions[0]);
+			if(position === 'static') {
+				self.$context.css('position', 'relative');
 			}
 
 			self.$context.css('overflow', 'hidden');
@@ -212,7 +210,7 @@
 
 				//  Listen to any callback functions
 				if($.isFunction(self.options.nav)) {
-					label = self.options.nav(key, label);
+					label = self.options.nav.call(self.$slides.eq(key), key, label);
 				}
 
 				//  And add it to our navigation item
@@ -241,7 +239,7 @@
 		//  (Not keyboard arrows, prev/next buttons)
 		self.initArrows = function() {
 			if(self.options.arrows === true) {
-				self.options.arrows = $.Unslider.defaults.arrows;
+				self.options.arrows = self.defaults.arrows;
 			}
 
 			//  Loop our options object and bind our events
@@ -258,7 +256,7 @@
 		//  Allow binding to multiple keycodes
 		self.initKeys = function() {
 			if(self.options.keys === true) {
-				self.options.keys = $.Unslider.defaults.keys;
+				self.options.keys = self.defaults.keys;
 			}
 
 			$(document).on('keyup' + self.eventSuffix, function(e) {
@@ -335,7 +333,7 @@
 
 			//  So then we need to hide the first slide
 			self.$container.css('margin-left', '-100%');
-		}
+		};
 
 		//  Remove any trace of arrows
 		//  Loop our array of arrows and use jQuery to remove
@@ -385,6 +383,7 @@
 			//  Animation shortcuts
 			//  Instead of passing a number index, we can now
 			//  use .data('unslider').animate('last');
+			//  or .unslider('animate:last')
 			//  to go to the very last slide
 			if(to === 'first') to = 0;
 			if(to === 'last') to = self.total;
@@ -436,7 +435,7 @@
 
 		//  Our default animation method, the old-school left-to-right
 		//  horizontal animation
-		self.animateHorizontal = function(to, dir) {
+		self.animateHorizontal = function(to) {
 			if(self.options.animateHeight) {
 				var height = self.$slides.eq(to).height();
 
@@ -532,7 +531,7 @@
 		}
 
 		return $.fn.animate.apply(this, arguments);
-	}
+	};
 
 	//  And set up our jQuery plugin
 	$.fn.unslider = function(opts) {
@@ -548,6 +547,7 @@
 				var fn = opts[0];
 				var call = $this.data('unslider')[fn];
 
+				//  Do we have arguments to pass to the string-function?
 				if(opts[1]) {
 					var args = opts[1].split(',');
 					return $.isFunction(call) && call.apply($this, args);
@@ -560,4 +560,4 @@
 		});
 	};
 	
-})(window.jQuery || false);
+})(window.jQuery);

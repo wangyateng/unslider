@@ -13,32 +13,25 @@
 		"outputPathIsSetByUser": 0,
 		"outputStyle": 1
 		},
-	"\/demos\/basic-slider.html": {
-		"fileType": 8192,
-		"ignore": 0,
+	"\/dist\/css\/unslider.css": {
+		"fileType": 16,
+		"ignore": 1,
 		"ignoreWasSetByUser": 0,
-		"inputAbbreviatedPath": "\/demos\/basic-slider.html",
+		"inputAbbreviatedPath": "\/dist\/css\/unslider.css",
 		"outputAbbreviatedPath": "No Output Path",
 		"outputPathIsOutsideProject": 0,
 		"outputPathIsSetByUser": 0
 		},
-	"\/demos\/css\/demo.css": {
-		"fileType": 16,
-		"ignore": 0,
+	"\/dist\/js\/unslider-min.js": {
+		"fileType": 64,
+		"ignore": 1,
 		"ignoreWasSetByUser": 0,
-		"inputAbbreviatedPath": "\/demos\/css\/demo.css",
-		"outputAbbreviatedPath": "No Output Path",
+		"inputAbbreviatedPath": "\/dist\/js\/unslider-min.js",
+		"outputAbbreviatedPath": "\/dist\/js\/min\/unslider-min-min.js",
 		"outputPathIsOutsideProject": 0,
-		"outputPathIsSetByUser": 0
-		},
-	"\/demos\/css\/reset.css": {
-		"fileType": 16,
-		"ignore": 0,
-		"ignoreWasSetByUser": 0,
-		"inputAbbreviatedPath": "\/demos\/css\/reset.css",
-		"outputAbbreviatedPath": "No Output Path",
-		"outputPathIsOutsideProject": 0,
-		"outputPathIsSetByUser": 0
+		"outputPathIsSetByUser": 0,
+		"outputStyle": 1,
+		"syntaxCheckerStyle": 1
 		},
 	"\/readme.md": {
 		"criticStyle": 0,
@@ -61,15 +54,6 @@
 		"randomFootnoteNumbers": 0,
 		"useCompatibilityMode": 0
 		},
-	"\/src\/css\/unslider-dots.css": {
-		"fileType": 16,
-		"ignore": 1,
-		"ignoreWasSetByUser": 0,
-		"inputAbbreviatedPath": "\/src\/css\/unslider-dots.css",
-		"outputAbbreviatedPath": "No Output Path",
-		"outputPathIsOutsideProject": 0,
-		"outputPathIsSetByUser": 0
-		},
 	"\/src\/css\/unslider-dots.less": {
 		"allowInsecureImports": 0,
 		"createSourceMap": 0,
@@ -90,15 +74,6 @@
 		"strictMath": 0,
 		"strictUnits": 0
 		},
-	"\/src\/css\/unslider.css": {
-		"fileType": 16,
-		"ignore": 1,
-		"ignoreWasSetByUser": 0,
-		"inputAbbreviatedPath": "\/src\/css\/unslider.css",
-		"outputAbbreviatedPath": "No Output Path",
-		"outputPathIsOutsideProject": 0,
-		"outputPathIsSetByUser": 0
-		},
 	"\/src\/css\/unslider.less": {
 		"allowInsecureImports": 0,
 		"createSourceMap": 0,
@@ -108,9 +83,9 @@
 		"ignore": 0,
 		"ignoreWasSetByUser": 1,
 		"inputAbbreviatedPath": "\/src\/css\/unslider.less",
-		"outputAbbreviatedPath": "\/src\/css\/unslider.css",
+		"outputAbbreviatedPath": "\/dist\/css\/unslider.css",
 		"outputPathIsOutsideProject": 0,
-		"outputPathIsSetByUser": 0,
+		"outputPathIsSetByUser": 1,
 		"outputStyle": 1,
 		"relativeURLS": 0,
 		"shouldRunAutoprefixer": 0,
@@ -199,25 +174,14 @@
 		"strictMath": 0,
 		"strictUnits": 0
 		},
-	"\/src\/js\/min\/unslider-min.js": {
-		"fileType": 64,
-		"ignore": 1,
-		"ignoreWasSetByUser": 0,
-		"inputAbbreviatedPath": "\/src\/js\/min\/unslider-min.js",
-		"outputAbbreviatedPath": "\/src\/js\/min\/min\/unslider-min-min.js",
-		"outputPathIsOutsideProject": 0,
-		"outputPathIsSetByUser": 0,
-		"outputStyle": 1,
-		"syntaxCheckerStyle": 1
-		},
 	"\/src\/js\/unslider.js": {
 		"fileType": 64,
 		"ignore": 0,
 		"ignoreWasSetByUser": 0,
 		"inputAbbreviatedPath": "\/src\/js\/unslider.js",
-		"outputAbbreviatedPath": "\/src\/js\/min\/unslider-min.js",
+		"outputAbbreviatedPath": "\/dist\/js\/unslider-min.js",
 		"outputPathIsOutsideProject": 0,
-		"outputPathIsSetByUser": 0,
+		"outputPathIsSetByUser": 1,
 		"outputStyle": 1,
 		"syntaxCheckerStyle": 1
 		},
