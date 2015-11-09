@@ -83,8 +83,7 @@
 			animateHeight: false,
 
 			//  Active class for the nav
-			activeClass: self._ + '-active',
-			lastActiveClass: self._ + '-last-active'
+			activeClass: self._ + '-active'
 		};
 
 		//  Set defaults
@@ -146,7 +145,7 @@
 			self.$context.trigger(self._ + '.ready');
 
 			//  Everyday I'm chainin'
-			return self.animate(self.options.index || self.current);
+			return self.animate(self.options.index || self.current, 'init');
 		};
 
 		self.setup = function() {
@@ -189,12 +188,16 @@
 				//  And restart our timeout
 				self.start();
 			}, self.options.delay);
+
+			return self;
 		};
 
 		//  And pause our timeouts
 		//  and force stop the slider if needed
 		self.stop = function() {
 			clearTimeout(self.interval);
+
+			return self;
 		};
 
 
@@ -228,6 +231,9 @@
 
 				//  Set the right active class, remove any other ones
 				$me.siblings().removeClass(self.options.activeClass);
+
+				//  Stop the jerky stop-start
+				self.stop().start();
 
 				//  Move the slide
 				self.animate($me.attr('data-slide'));
@@ -437,9 +443,7 @@
 		//  horizontal animation
 		self.animateHorizontal = function(to) {
 			if(self.options.animateHeight) {
-				var height = self.$slides.eq(to).height();
-
-				self.$context.css('height', height);
+				self.$context.move({height: self.$slides.eq(to).height()});
 			}
 
 			if(self.options.infinite) {
@@ -476,28 +480,27 @@
 				}
 			}
 
-			return self.$container._move({left: -(100 * to) + '%'}, self.options.speed, self.options.easing, function() {
-				self.$context.trigger(self._ + '.moved');
-			});
+			return self._move(self.$container, {left: -(100 * to) + '%'});
 		};
 
 
 		//  Fade between slides rather than, uh, sliding it
 		self.animateFade = function(to, dir) {
-			var $active = self.$slides.removeClass(self.options.lastActiveClass).eq(to);
-			var $prev = $active.prev();
-
-			if(!$prev.length) {
-				$prev = self.$slides.last();
-			}
-
-			if(dir === 'prev') {
-				//  @TODO: fix fading backwards
-			}
+			var $active = self.$slides.eq(to).addClass(self.options.activeClass);
 
 			//  Toggle our classes
-			$prev.addClass(self.options.lastActiveClass).removeClass(self.options.activeClass);
-			$active.removeClass(self.options.lastActiveClass).addClass(self.options.activeClass);
+			self._move($active.siblings().removeClass(self.options.activeClass), {opacity: 0});
+			self._move($active, {opacity: 1}, false);
+		};
+
+		self._move = function($el, obj, callback) {
+			if(callback !== false) {
+				callback = function() {
+					self.$context.trigger(self._ + '.moved');
+				};
+			}
+
+			return $el._move(obj, self.options.speed, self.options.easing, callback);
 		};
 
 		//  Allow daisy-chaining of methods

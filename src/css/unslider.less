@@ -7,9 +7,12 @@
 @import 'unslider/reset';
 
 //  Unfortunately, LESS isn't great at conditionals
-.transition-height() when (@unslider-transition-height = true) { @import 'unslider/transition-height'; }
-.transition-height();
-
-//  Unfortunately, LESS isn't great at conditionals
 .use-dots() when (@unslider-dot-navigation = true) { @import 'unslider/dots'; }
 .use-dots();
+
+//  You can also import dots directly yourself to use
+//  in a more specific selector, like so:
+// #demo {
+// 	.use-dots() when (@unslider-dot-navigation = true) { @import 'unslider/dots'; }
+// 	.use-dots();
+// }
