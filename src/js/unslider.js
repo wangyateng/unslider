@@ -59,8 +59,8 @@
 			//  Either set true/false, or an object with the HTML
 			//  elements for each arrow like below:
 			arrows: {
-				prev: '<a class="' + self._ + '-arrow prev">Previous</a>',
-				next: '<a class="' + self._ + '-arrow next">Next</a>'
+				prev: '<a class="' + self._ + '-arrow prev">←</a>',
+				next: '<a class="' + self._ + '-arrow next">→</a>'
 			},
 
 			//  How should Unslider animate?
@@ -445,7 +445,7 @@
 		//  horizontal animation
 		self.animateHorizontal = function(to) {
 			if(self.options.animateHeight) {
-				self.$context.move({height: self.$slides.eq(to).height()});
+				self._move(self.$context, {height: self.$slides.eq(to).height()}, false);
 			}
 
 			if(self.options.infinite) {
