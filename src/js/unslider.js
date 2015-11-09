@@ -233,7 +233,9 @@
 				$me.siblings().removeClass(self.options.activeClass);
 
 				//  Stop the jerky stop-start
-				self.stop().start();
+				if(self.options.autoplay) {
+					self.stop().start();
+				}
 
 				//  Move the slide
 				self.animate($me.attr('data-slide'));
