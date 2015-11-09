@@ -1,13 +1,24 @@
 {
   "name": "unslider",
-  "main": "src/unslider.min.js",
-  "license": "MIT",
-  "dependencies": {
-    "jquery": "latest"
-  },
-  "ignore" : [
-    "site/",
-	"readme.md",
-	".gitignore"
+  "version": "2.0.0",
+  "homepage": "http://unslider.com",
+  "authors": [
+    "Visual Idiot <iam@visualidiot.com>"
+  ],
+  "description": "The simplest little slider.",
+  "main": "src/js/unslider.js",
+  "keywords": [
+    "slider",
+    "jquery",
+    "unslider",
+    "carousel"
+  ],
+  "license": "WTFPL",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
   ]
 }
