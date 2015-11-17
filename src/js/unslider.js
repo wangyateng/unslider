@@ -232,11 +232,6 @@
 				//  Set the right active class, remove any other ones
 				$me.siblings().removeClass(self.options.activeClass);
 
-				//  Stop the jerky stop-start
-				if(self.options.autoplay) {
-					self.stop().start();
-				}
-
 				//  Move the slide
 				self.animate($me.attr('data-slide'));
 			});
@@ -399,6 +394,10 @@
 			//  Don't animate if it's not a valid index
 			if(isNaN(to)) {
 				return self;
+			}
+
+			if(self.options.autoplay) {
+				self.stop().start();
 			}
 
 			self.setIndex(to);
