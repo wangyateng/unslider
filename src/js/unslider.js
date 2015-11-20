@@ -83,7 +83,12 @@
 			animateHeight: false,
 
 			//  Active class for the nav
-			activeClass: self._ + '-active'
+			activeClass: self._ + '-active',
+
+			//  Have swipe support?
+			//  You can set this here with a boolean and always use
+			//  initSwipe/destroySwipe later on.
+			swipe: true
 		};
 
 		//  Set defaults
@@ -130,7 +135,7 @@
 			});
 
 			//  Add swipe support
-			if(typeof jQuery.event.special.swipe !== undefined) {
+			if(typeof jQuery.event.special.swipe !== undefined && self.options.swipe) {
 				self.initSwipe();
 			}
 
@@ -297,7 +302,13 @@
 			if(self.options.animation !== 'fade') {
 				self.$container.on({
 					move: function(e) {
-						self.$container.css('left', (100 * e.distX / width) + '%');
+						self.$container.css('left', -(100 * self.current) + (100 * e.distX / width) + '%');
+					},
+
+					moveend: function(e) {
+						if((Math.abs(e.distX) / width) < $.event.special.swipe.settings.threshold) {
+							return self._move(self.$container, {left: -(100 * self.current) + '%'}, false, 200);
+						}
 					}
 				});
 			}
@@ -490,14 +501,14 @@
 			self._move($active, {opacity: 1}, false);
 		};
 
-		self._move = function($el, obj, callback) {
+		self._move = function($el, obj, callback, speed) {
 			if(callback !== false) {
 				callback = function() {
 					self.$context.trigger(self._ + '.moved');
 				};
 			}
 
-			return $el._move(obj, self.options.speed, self.options.easing, callback);
+			return $el._move(obj, speed || self.options.speed, self.options.easing, callback);
 		};
 
 		//  Allow daisy-chaining of methods
