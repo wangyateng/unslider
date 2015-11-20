@@ -486,7 +486,7 @@
 
 
 		//  Fade between slides rather than, uh, sliding it
-		self.animateFade = function(to, dir) {
+		self.animateFade = function(to) {
 			var $active = self.$slides.eq(to).addClass(self.options.activeClass);
 
 			//  Toggle our classes
@@ -557,7 +557,9 @@
 					return $.isFunction(call) && call.apply($this, args);
 				}
 
-				return $.isFunction(call) && call();
+				$.isFunction(call) && call();
+
+				return this;
 			}
 
 			return $this.data('unslider', new $.Unslider($this, opts));
