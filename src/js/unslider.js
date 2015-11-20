@@ -298,10 +298,6 @@
 				self.$container.on({
 					move: function(e) {
 						self.$container.css('left', (100 * e.distX / width) + '%');
-					},
-
-					moveend: function() {
-						self.$container.animate({left: 0}, 200);
 					}
 				});
 			}
