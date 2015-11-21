@@ -155,7 +155,7 @@
 
 		self.setup = function() {
 			//  Add a CSS hook to the main element
-			self.$context.addClass(self.prefix + 'slider ' + self.prefix + self.options.animation).wrap('<div class="' + self._ + '" />');
+			self.$context.addClass(self.prefix + self.options.animation).wrap('<div class="' + self._ + '" />');
 			self.$parent = self.$context.parent('.' + self._);
 
 			//  We need to manually check if the container is absolutely
@@ -178,8 +178,14 @@
 
 			//  Set the total width
 			if(self.options.animation !== 'fade') {
-				self.$container.css('width', (self.total * 100) + '%').addClass(self.prefix + 'carousel');
-				self.$slides.css('width', (100 / self.total) + '%');
+				var prop = 'width';
+
+				if(self.options.animation === 'vertical') {
+					prop = 'height';
+				}
+
+				self.$container.css(prop, (self.total * 100) + '%').addClass(self.prefix + 'carousel');
+				self.$slides.css(prop, (100 / self.total) + '%');
 			}
 		};
 
@@ -190,8 +196,10 @@
 				//  Move on to the next slide
 				self.next();
 
-				//  And restart our timeout
-				self.start();
+				//  If we've got autoplay set up
+				//  we don't need to keep starting
+				//  the slider from within our timeout
+				//  as .animate() calls it for us
 			}, self.options.delay);
 
 			return self;
@@ -326,10 +334,10 @@
 					
 					//  Exclude all cloned slides and call .first() or .last()
 					//  depending on what `item` is.
-					self.$slides.filter(':not(".' + self._ + '-cloned")')[item]()
+					self.$slides.filter(':not(".' + self._ + '-clone")')[item]()
 
 					//  Make a copy of it and identify it as a clone
-					.clone().addClass(self._ + '-cloned')
+					.clone().addClass(self._ + '-clone')
 
 					//  Either insert before or after depending on whether we're
 					//  the first or last clone
@@ -342,7 +350,7 @@
 			});
 
 			//  So then we need to hide the first slide
-			self.$container.css('margin-left', '-100%');
+			self.$container.css({marginLeft: '-100%'});
 		};
 
 		//  Remove any trace of arrows
@@ -357,10 +365,7 @@
 		//  Remove any swipe events and reset the position
 		self.destroySwipe = function() {
 			//  We bind to 4 events, so we'll unbind those
-			self.$container.off('movestart swipeleft move moveend')
-			//  If this was called mid-swipe we need to reset
-			//  the swipe position as well. Can do that here.
-				.css('left', 0);
+			self.$container.off('movestart move moveend');
 		};
 
 		//  Unset the keyboard navigation
@@ -450,10 +455,39 @@
 		//  Our default animation method, the old-school left-to-right
 		//  horizontal animation
 		self.animateHorizontal = function(to) {
-			if(self.options.animateHeight) {
-				self._move(self.$context, {height: self.$slides.eq(to).height()}, false);
+			var prop = 'left';
+
+			//  Add RTL support, slide the slider
+			//  the other way if the site is right-to-left
+			if(self.$context.attr('dir') === 'rtl') {
+				prop = 'right';
 			}
 
+			return self.slide(prop, to);
+		};
+
+		//  The same animation methods, but vertical support
+		//  RTL doesn't affect the vertical direction so we
+		//  can just call as is
+		self.animateVertical = function(to) {
+			self.options.animateHeight = true;
+			return self.slide('top', to);
+		}
+
+		//  Actually move the slide now
+		//  We have to pass a property to animate as there's
+		//  a few different directions it can now move, but it's
+		//  otherwise unchanged from before.
+		self.slide = function(prop, to) {
+			//  If we want to change the height of the slider
+			//  to match the current slide, you can set
+			//  {animateHeight: true}
+			if(self.options.animateHeight) {
+				self._move(self.$context, {height: self.$slides.eq(to).outerHeight()}, false);
+			}
+
+			//  For infinite sliding we add a dummy slide at the end and start
+			//  of each slider to give the appearance of being infinite
 			if(self.options.infinite) {
 				var dummy;
 
@@ -482,13 +516,21 @@
 					//  this whole mess up.
 					self.$context.on(self._ + '.moved', function() {
 						if(self.current === dummy) {
-							self.$container.css('left', -(100 * dummy) + '%').off(self._ + '.moved');
+							self.$container.css(prop, -(100 * dummy) + '%').off(self._ + '.moved');
 						}
 					});
 				}
 			}
 
-			return self._move(self.$container, {left: -(100 * to) + '%'});
+			//  We need to create an object to store our property in
+			//  since we don't know what it'll be.
+			var obj = {};
+
+			//  Manually create it here
+			obj[prop] = -(100 * to) + '%';
+
+			//  And animate using our newly-created object
+			return self._move(self.$container, obj);
 		};
 
 
@@ -528,20 +570,22 @@
 	//  Simples.
 	$._ucfirst = function(str) {
 		//  Take our variable, run a regex on the first letter
-		return str.toString().toLowerCase().replace(/^./, function(match) {
+		return (str + '').toLowerCase().replace(/^./, function(match) {
 			//  And uppercase it. Simples.
 			return match.toUpperCase();
 		});
 	};
 
 	$.fn._move = function() {
+		var type = 'animate';
+
 		this.stop(true, true);
 
 		if($.fn.velocity) {
-			return $.fn.velocity.apply(this, arguments);
+			type = 'velocity';
 		}
 
-		return $.fn.animate.apply(this, arguments);
+		return $.fn[type].apply(this, arguments);
 	};
 
 	//  And set up our jQuery plugin

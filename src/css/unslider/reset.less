@@ -13,6 +13,20 @@
 		}
 	}
 
+	//  Vertical sliders don't float left
+	&-vertical {
+		> ul {
+			height: 100%;
+		}
+
+		li {
+			float: none;
+			width: 100%;
+		}
+	}
+
+	//  Fading needs everything to appear on top of
+	//  each other
 	&-fade {
 		position: relative;
 
