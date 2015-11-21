@@ -348,9 +348,6 @@
 					)
 				);
 			});
-
-			//  So then we need to hide the first slide
-			self.$container.css({marginLeft: '-100%'});
 		};
 
 		//  Remove any trace of arrows
@@ -463,6 +460,11 @@
 				prop = 'right';
 			}
 
+			if(self.options.infinite) {
+				//  So then we need to hide the first slide
+				self.$container.css('margin-' + prop, '-100%');
+			}
+
 			return self.slide(prop, to);
 		};
 
@@ -471,6 +473,14 @@
 		//  can just call as is
 		self.animateVertical = function(to) {
 			self.options.animateHeight = true;
+
+			//  Normal infinite CSS fix doesn't work for
+			//  vertical animation so we need to manually set it
+			//  with pixels. Ah well.
+			if(self.options.infinite) {
+				self.$container.css('margin-top', -self.$slides.outerHeight());
+			}
+
 			return self.slide('top', to);
 		}
 
