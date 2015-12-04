@@ -59,8 +59,8 @@
 			//  Either set true/false, or an object with the HTML
 			//  elements for each arrow like below:
 			arrows: {
-				prev: '<a class="' + self._ + '-arrow prev">←</a>',
-				next: '<a class="' + self._ + '-arrow next">→</a>'
+				prev: '<a class="' + self._ + '-arrow prev">Prev</a>',
+				next: '<a class="' + self._ + '-arrow next">Next</a>'
 			},
 
 			//  How should Unslider animate?
@@ -135,7 +135,7 @@
 			});
 
 			//  Add swipe support
-			if(typeof jQuery.event.special.swipe !== undefined && self.options.swipe) {
+			if(jQuery.event.special.swipe && self.options.swipe) {
 				self.initSwipe();
 			}
 
@@ -380,10 +380,10 @@
 			self.current = Math.min(Math.max(0, to), self.total - 1);
 
 			if(self.options.nav) {
-				self.$nav.find('[data-slide="' + self.current + '"]')._toggleActive(self.options.activeClass);
+				self.$nav.find('[data-slide="' + self.current + '"]')._active(self.options.activeClass);
 			}
 
-			self.$slides.eq(self.current)._toggleActive(self.options.activeClass);
+			self.$slides.eq(self.current)._active(self.options.activeClass);
 
 			return self;
 		};
@@ -571,7 +571,7 @@
 	//  They're both just helpful types of shorthand for
 	//  anything that might take too long to write out or
 	//  something that might be used more than once.
-	$.fn._toggleActive = function(className) {
+	$.fn._active = function(className) {
 		return this.addClass(className).siblings().removeClass(className);
 	};
 
@@ -587,15 +587,8 @@
 	};
 
 	$.fn._move = function() {
-		var type = 'animate';
-
 		this.stop(true, true);
-
-		if($.fn.velocity) {
-			type = 'velocity';
-		}
-
-		return $.fn[type].apply(this, arguments);
+		return $.fn[$.fn.velocity ? 'velocity' : 'animate'].apply(this, arguments);
 	};
 
 	//  And set up our jQuery plugin
@@ -609,18 +602,10 @@
 			if(typeof opts === 'string' && $this.data('unslider')) {
 				opts = opts.split(':');
 
-				var fn = opts[0];
-				var call = $this.data('unslider')[fn];
+				var call = $this.data('unslider')[opts[0]];
 
 				//  Do we have arguments to pass to the string-function?
-				if(opts[1]) {
-					var args = opts[1].split(',');
-					return $.isFunction(call) && call.apply($this, args);
-				}
-
-				$.isFunction(call) && call();
-
-				return this;
+				$.isFunction(call) && call.apply($this, args ? null : opts[1].split(','));
 			}
 
 			return $this.data('unslider', new $.Unslider($this, opts));
