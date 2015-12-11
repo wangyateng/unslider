@@ -130,7 +130,7 @@
 
 			//  We want to keep this script as small as possible
 			//  so we'll optimise some checks
-			['nav', 'arrows', 'keys', 'infinite'].forEach(function(module) {
+			$.each(['nav', 'arrows', 'keys', 'infinite'], function(index, module) {
 				self.options[module] && self['init' + $._ucfirst(module)]();
 			});
 
@@ -328,7 +328,7 @@
 		self.initInfinite = function() {
 			var pos = ['first', 'last'];
 
-			pos.forEach(function(item, index) {
+			$.each(pos, function(index, item) {
 				self.$slides.push.apply(
 					self.$slides,
 					
@@ -354,7 +354,7 @@
 		//  Loop our array of arrows and use jQuery to remove
 		//  It'll unbind any event handlers for us
 		self.destroyArrows = function() {
-			self.$arrows.forEach(function($arrow) {
+			$.each(self.$arrows, function($arrow) {
 				$arrow.remove();
 			});
 		};
