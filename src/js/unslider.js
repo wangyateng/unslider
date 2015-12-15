@@ -482,7 +482,7 @@
 			}
 
 			return self.slide('top', to);
-		}
+		};
 
 		//  Actually move the slide now
 		//  We have to pass a property to animate as there's
@@ -605,7 +605,7 @@
 				var call = $this.data('unslider')[opts[0]];
 
 				//  Do we have arguments to pass to the string-function?
-				$.isFunction(call) && call.apply($this, args ? null : opts[1].split(','));
+				$.isFunction(call) && call.apply($this, opts[1] ? opts[1].split(',') : null);
 			}
 
 			return $this.data('unslider', new $.Unslider($this, opts));
