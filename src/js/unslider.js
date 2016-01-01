@@ -354,7 +354,7 @@
 		//  Loop our array of arrows and use jQuery to remove
 		//  It'll unbind any event handlers for us
 		self.destroyArrows = function() {
-			$.each(self.$arrows, function($arrow) {
+			$.each(self.$arrows, function(i, $arrow) {
 				$arrow.remove();
 			});
 		};
