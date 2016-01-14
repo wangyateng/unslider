@@ -311,10 +311,10 @@
 					},
 
 					moveend: function(e) {
-
+						
 						if((Math.abs(e.distX) / width) < $.event.special.swipe.settings.threshold) {
 
-							self[self.current + e.distX < 0 ? 'next' : 'prev']();
+							self[ e.distX < 0 ? 'next' : 'prev' ]();
 						}
 					}
 				});
