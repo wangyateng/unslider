@@ -289,33 +289,32 @@
 		self.initSwipe = function() {
 			var width = self.$slides.width();
 
-			self.$container.on({
-				swipeleft: self.next,
-				swiperight: self.prev,
-
-				movestart: function(e) {
-					//  If the movestart heads off in a upwards or downwards
-					//  direction, prevent it so that the browser scrolls normally.
-					if((e.distX > e.distY && e.distX < -e.distY) || (e.distX < e.distY && e.distX > -e.distY)) {
-						return !!e.preventDefault();
-					}
-
-					self.$container.css('position', 'relative');
-				}
-			});
-
 			//  We don't want to have a tactile swipe in the slider
 			//  in the fade animation, as it can cause some problems
 			//  with layout, so we'll just disable it.
 			if(self.options.animation !== 'fade') {
+
 				self.$container.on({
+
+					movestart: function(e) {
+						//  If the movestart heads off in a upwards or downwards
+						//  direction, prevent it so that the browser scrolls normally.
+						if((e.distX > e.distY && e.distX < -e.distY) || (e.distX < e.distY && e.distX > -e.distY)) {
+							return !!e.preventDefault();
+						}
+
+						self.$container.css('position', 'relative');
+					},
+
 					move: function(e) {
 						self.$container.css('left', -(100 * self.current) + (100 * e.distX / width) + '%');
 					},
 
 					moveend: function(e) {
+
 						if((Math.abs(e.distX) / width) < $.event.special.swipe.settings.threshold) {
-							return self._move(self.$container, {left: -(100 * self.current) + '%'}, false, 200);
+
+							self[self.current + e.distX < 0 ? 'next' : 'prev']();
 						}
 					}
 				});
