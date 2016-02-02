@@ -3,8 +3,14 @@
  *   version 2.0
  *   by @idiot and friends
  */
- 
-(function($) {
+
+(function(factory) {
+	if (typeof module === 'object' && typeof module.exports === 'object') {
+		factory(require('jquery'));
+	} else {
+		factory(window.jQuery);
+	}
+}(function($) {
 	//  Don't throw any errors when jQuery
 	if(!$) {
 		return console.warn('Unslider needs jQuery');
@@ -613,4 +619,4 @@
 		});
 	};
 	
-})(window.jQuery);
+}));
