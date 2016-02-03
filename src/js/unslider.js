@@ -497,9 +497,7 @@
 			//  If we want to change the height of the slider
 			//  to match the current slide, you can set
 			//  {animateHeight: true}
-			if(self.options.animateHeight) {
-				self._move(self.$context, {height: self.$slides.eq(to).outerHeight()}, false);
-			}
+			self.animateHeight(to);
 
 			//  For infinite sliding we add a dummy slide at the end and start
 			//  of each slider to give the appearance of being infinite
@@ -550,12 +548,27 @@
 
 
 		//  Fade between slides rather than, uh, sliding it
-		self.animateFade = function(to) {
+        self.animateFade = function(to) {
+			//  If we want to change the height of the slider
+			//  to match the current slide, you can set
+			//  {animateHeight: true}
+			self.animateHeight(to);
+
 			var $active = self.$slides.eq(to).addClass(self.options.activeClass);
 
 			//  Toggle our classes
 			self._move($active.siblings().removeClass(self.options.activeClass), {opacity: 0});
 			self._move($active, {opacity: 1}, false);
+		};
+
+		// Animate height of slider
+		self.animateHeight = function(to) {
+			//  If we want to change the height of the slider
+			//  to match the current slide, you can set
+			//  {animateHeight: true}
+			if (self.options.animateHeight) {
+				self._move(self.$context, {height: self.$slides.eq(to).outerHeight()}, false);
+			}
 		};
 
 		self._move = function($el, obj, callback, speed) {
