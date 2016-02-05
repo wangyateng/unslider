@@ -94,7 +94,10 @@
 			//  Have swipe support?
 			//  You can set this here with a boolean and always use
 			//  initSwipe/destroySwipe later on.
-			swipe: true
+			swipe: true,
+			// Swipe threshold -
+			// lower float for enabling short swipe
+			swipeThreshold: 0.2			
 		};
 
 		//  Set defaults
@@ -317,10 +320,17 @@
 					},
 
 					moveend: function(e) {
-						
-						if((Math.abs(e.distX) / width) < $.event.special.swipe.settings.threshold) {
+						// Check if swiped distance is greater than threshold.
+						// If yes slide to next/prev slide. If not animate to
+						// starting point.
 
-							self[ e.distX < 0 ? 'next' : 'prev' ]();
+						if((Math.abs(e.distX) / width) > self.options.swipeThreshold) {
+
+							self[e.distX < 0 ? 'next' : 'prev']();
+						}
+						else {
+
+							self.$container.animate({left: -(100 * self.current) + '%' }, self.options.speed / 2 );
 						}
 					}
 				});
