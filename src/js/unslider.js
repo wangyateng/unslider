@@ -7,7 +7,10 @@
 (function(factory) {
 	if (typeof module === 'object' && typeof module.exports === 'object') {
 		factory(require('jquery'));
-	} else {
+	} else if (typeof define === 'function' && define.amd) {
+	    // AMD. Register as an anonymous module.
+        define([], factory(window.jQuery));
+    } else {
 		factory(window.jQuery);
 	}
 }(function($) {
