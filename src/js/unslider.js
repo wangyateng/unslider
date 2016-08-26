@@ -627,8 +627,8 @@
 
 	//  And set up our jQuery plugin
 	$.fn.unslider = function(opts) {
-		return this.each(function() {
-			var $this = $(this);
+		return this.each(function(index,elem) {
+			var $this = $(elem);
 
 			//  Allow usage of .unslider('function_name')
 			//  as well as using .data('unslider') to access the
