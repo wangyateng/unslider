@@ -629,7 +629,10 @@
 	$.fn.unslider = function(opts) {
 		return this.each(function(index,elem) {
 			var $this = $(elem);
-
+            var unslider = $(elem).data('unslider');
+            if(unslider instanceof $.Unslider) {
+                return;
+            }
 			//  Allow usage of .unslider('function_name')
 			//  as well as using .data('unslider') to access the
 			//  main Unslider object
