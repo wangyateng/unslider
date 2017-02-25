@@ -6,7 +6,7 @@
 
 (function(factory) {
 	if (typeof module === 'object' && typeof module.exports === 'object') {
-		factory(require('jquery'));
+		factory(window.jQuery);
 	} else if (typeof define === 'function' && define.amd) {
 	    // AMD. Register as an anonymous module.
         define([], factory(window.jQuery));
